@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Zap, CreditCard, Shield, Settings, Bell, Star } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useApp } from '../../contexts/AppContext.jsx';
+import { useToast } from '../../contexts/ToastContext.jsx';
 import { getTotalCredits } from '../../utils/creditEngine.js';
 import { getPlanById } from '../../data/plans.js';
 import BuyCreditsModal from './BuyCreditsModal.jsx';
@@ -9,7 +10,10 @@ import BuyCreditsModal from './BuyCreditsModal.jsx';
 export default function SettingsPage() {
   const { user, isAdmin, updateUser } = useAuth();
   const { plans } = useApp();
+  const { upgradePlan } = useApp();
+  const toast = useToast();
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
+  const [upgradingPlan, setUpgradingPlan] = useState(null);
 
   // Reminders states
   const [whatsappPhone, setWhatsappPhone] = useState(user?.whatsappPhone || '');
@@ -22,19 +26,28 @@ export default function SettingsPage() {
   const handleSaveReminders = async (e) => {
     e.preventDefault();
     setSavingSettings(true);
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 600));
-    updateUser({
-      whatsappPhone,
-      whatsappRemindersEnabled: remindersEnabled,
-    });
-    setSavingSettings(false);
-    alert('Preferências de notificação salvas com sucesso!');
+    try {
+      await updateUser({
+        whatsappPhone,
+        whatsappRemindersEnabled: remindersEnabled,
+      });
+      toast.success('Preferências de notificação salvas com sucesso!');
+    } catch (err) {
+      toast.error('Erro ao salvar configurações.');
+    } finally {
+      setSavingSettings(false);
+    }
   };
 
-  const handleUpgradePlan = (planId) => {
-    updateUser({ planId });
-    alert(`Seu plano foi atualizado com sucesso para ${getPlanById(planId).name}!`);
+  const handleUpgradePlan = async (planId) => {
+    setUpgradingPlan(planId);
+    try {
+      await upgradePlan(planId);
+      // User will be redirected to Stripe Checkout
+    } catch (err) {
+      toast.error('Erro ao iniciar upgrade. Tente novamente.');
+      setUpgradingPlan(null);
+    }
   };
 
   return (
@@ -67,7 +80,7 @@ export default function SettingsPage() {
                 Cobrança ativa via Stripe. Atualize o cartão e verifique faturas no painel seguro.
               </p>
             </div>
-            <button className="btn btn-secondary btn-block" style={{ marginTop: 'var(--space-lg)' }} onClick={() => alert('Redirecionando para o Stripe Billing Portal...')}>
+            <button className="btn btn-secondary btn-block" style={{ marginTop: 'var(--space-lg)' }} onClick={() => window.open('https://billing.stripe.com', '_blank')}>
               Gerenciar assinatura
             </button>
           </div>
@@ -162,10 +175,10 @@ export default function SettingsPage() {
                   </ul>
                   <button
                     className={`btn btn-block ${isCurrent ? 'btn-secondary' : 'btn-primary'}`}
-                    disabled={isCurrent}
+                    disabled={isCurrent || upgradingPlan === p.id}
                     onClick={() => handleUpgradePlan(p.id)}
                   >
-                    {isCurrent ? 'Plano atual' : 'Fazer Upgrade'}
+                    {isCurrent ? 'Plano atual' : upgradingPlan === p.id ? 'Redirecionando...' : 'Fazer Upgrade'}
                   </button>
                 </div>
               );

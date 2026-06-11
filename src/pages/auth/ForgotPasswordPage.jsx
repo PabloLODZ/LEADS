@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Radar, CheckCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
 import { validateEmail } from '../../utils/validators.js';
 
 export default function ForgotPasswordPage() {
+  const { resetPassword } = useAuth();
   const toast = useToast();
 
   const [email, setEmail] = useState('');
@@ -36,12 +38,15 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1200));
-
-    setIsLoading(false);
-    setIsSent(true);
-    toast.success('Link de recuperação enviado!');
+    try {
+      await resetPassword(email);
+      setIsSent(true);
+      toast.success('Link de recuperação enviado!');
+    } catch (err) {
+      toast.error(err.message || 'Erro ao enviar link. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

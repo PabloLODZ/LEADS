@@ -13,12 +13,9 @@ export default function BuyCreditsModal({ isOpen, onClose }) {
 
   const handleBuyPack = async (pack) => {
     try {
-      await purchaseCredits(pack.leads, pack.price);
-      toast.success(
-        'Compra concluída!',
-        `Você adquiriu o pacote ${pack.name} com ${pack.leads} créditos extras.`
-      );
-      onClose();
+      // purchaseCredits now redirects to Stripe Checkout
+      await purchaseCredits(pack.leads, pack.id, pack.price);
+      // User will be redirected to Stripe — no need to close modal
     } catch (err) {
       toast.error('Erro na transação', err.message || 'Não foi possível completar a transação.');
     }
