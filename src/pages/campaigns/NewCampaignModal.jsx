@@ -128,8 +128,8 @@ export default function NewCampaignModal({ isOpen, onClose }) {
       const newCampaign = await createCampaign(campaignData);
       toast.info('Buscando leads', 'Nossa IA está garimpando leads qualificados para sua campanha...');
       
-      // Generate leads using mock engine
-      await generateLeadsForCampaign(newCampaign.id, desiredCount);
+      // Generate leads using Google Places API
+      await generateLeadsForCampaign(newCampaign, desiredCount);
       
       toast.success('Campanha iniciada!', `Garimpamos ${desiredCount} leads com score otimizado.`);
       onClose();
