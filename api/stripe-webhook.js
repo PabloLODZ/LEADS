@@ -1,5 +1,5 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { createClient } = require('@supabase/supabase-js');
+import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
 function createSupabaseAdmin() {
   return createClient(
@@ -54,7 +54,6 @@ async function handleCheckoutCompleted(session, supabase) {
       return;
     }
 
-    // Adicionar créditos comprados ao perfil
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('purchased_credits')
@@ -78,27 +77,21 @@ async function handleCheckoutCompleted(session, supabase) {
       return;
     }
 
-    // Criar transação de créditos
     await supabase.from('credit_transactions').insert({
       user_id: userId,
       type: 'purchase',
       amount: credits,
-      description: `Compra de pacote ${metadata.packId || 'avulso'} — ${credits} créditos`,
+      reason: `Compra de pacote ${metadata.packId || 'avulso'} — ${credits} créditos`,
     });
 
-    // Criar registro de pagamento
     await supabase.from('payments').insert({
       user_id: userId,
       stripe_session_id: session.id,
-      stripe_payment_intent: session.payment_intent,
+      stripe_payment_id: session.payment_intent,
       amount: session.amount_total,
-      currency: session.currency || 'brl',
-      status: 'completed',
-      type: 'credits',
-      metadata: {
-        packId: metadata.packId,
-        credits,
-      },
+      status: 'aprovado',
+      product_type: 'creditos_avulsos',
+      credits_purchased: credits,
     });
 
     console.log(`Créditos adicionados: ${credits} para o usuário ${userId}`);
@@ -123,7 +116,6 @@ async function handleCheckoutCompleted(session, supabase) {
         plan_id: planId,
         subscription_status: 'active',
         stripe_customer_id: session.customer,
-        stripe_subscription_id: subscriptionId,
         base_credits: planCredits,
       })
       .eq('id', userId);
@@ -133,18 +125,13 @@ async function handleCheckoutCompleted(session, supabase) {
       return;
     }
 
-    // Criar registro de pagamento
     await supabase.from('payments').insert({
       user_id: userId,
+      plan_id: planId,
       stripe_session_id: session.id,
-      stripe_subscription_id: subscriptionId,
       amount: session.amount_total,
-      currency: session.currency || 'brl',
-      status: 'completed',
-      type: 'subscription',
-      metadata: {
-        planId,
-      },
+      status: 'aprovado',
+      product_type: 'plano',
     });
 
     console.log(`Assinatura ativada: plano ${planId} para o usuário ${userId}`);
@@ -155,7 +142,6 @@ async function handleCheckoutCompleted(session, supabase) {
 async function handleSubscriptionUpdated(subscription, supabase) {
   const customerId = subscription.customer;
 
-  // Buscar o usuário pelo stripe_customer_id
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('id')
@@ -167,7 +153,6 @@ async function handleSubscriptionUpdated(subscription, supabase) {
     return;
   }
 
-  // Determinar o plano a partir do price_id da assinatura
   const priceId = subscription.items?.data?.[0]?.price?.id;
   const planId = getPlanIdFromPriceId(priceId);
 
@@ -175,18 +160,17 @@ async function handleSubscriptionUpdated(subscription, supabase) {
     active: 'active',
     past_due: 'past_due',
     canceled: 'cancelled',
-    unpaid: 'unpaid',
-    trialing: 'trialing',
-    incomplete: 'incomplete',
-    incomplete_expired: 'expired',
-    paused: 'paused',
+    unpaid: 'past_due',
+    trialing: 'trial',
+    incomplete: 'trial',
+    incomplete_expired: 'cancelled',
+    paused: 'cancelled',
   };
 
   const subscriptionStatus = statusMap[subscription.status] || subscription.status;
 
   const updateData = {
     subscription_status: subscriptionStatus,
-    stripe_subscription_id: subscription.id,
   };
 
   if (planId) {
@@ -243,7 +227,6 @@ async function handleInvoicePaymentSucceeded(invoice, supabase) {
   }
 
   const customerId = invoice.customer;
-  const subscriptionId = invoice.subscription;
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
@@ -269,23 +252,23 @@ async function handleInvoicePaymentSucceeded(invoice, supabase) {
       return;
     }
 
-    // Criar transação de créditos pela renovação
     await supabase.from('credit_transactions').insert({
       user_id: profile.id,
       type: 'plan_renewal',
       amount: planCredits,
-      description: `Renovação mensal do plano ${profile.plan_id} — ${planCredits} créditos`,
+      reason: `Renovação mensal do plano ${profile.plan_id} — ${planCredits} créditos`,
     });
 
     console.log(`Créditos renovados: ${planCredits} para o usuário ${profile.id} (plano ${profile.plan_id})`);
   }
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido. Use POST.' });
   }
 
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   let event;
 
   try {
@@ -335,9 +318,9 @@ module.exports = async function handler(req, res) {
     console.error(`Erro ao processar evento ${event.type}:`, err);
     return res.status(500).json({ error: 'Erro ao processar o evento do webhook.' });
   }
-};
+}
 
-module.exports.config = {
+export const config = {
   api: {
     bodyParser: false,
   },

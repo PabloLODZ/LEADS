@@ -1,12 +1,12 @@
 // api/setup-stripe.js
 // ⚠️ ENDPOINT DE CONFIGURAÇÃO - Use apenas UMA vez após o primeiro deploy!
-// Acesse: https://SEU-SITE.vercel.app/api/setup-stripe
+// Acesse: https://SEU-SITE.vercel.app/api/setup-stripe?token=lodz-setup-2024
 // Copie os price IDs retornados e coloque nas variáveis de ambiente do Vercel.
 // DEPOIS DISSO, delete este arquivo por segurança.
 
-const Stripe = require('stripe');
+import Stripe from 'stripe';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Segurança básica: só aceita GET com um token secreto
   const { token } = req.query;
   if (token !== 'lodz-setup-2024') {
@@ -30,7 +30,7 @@ module.exports = async function handler(req, res) {
     });
     const starterPrice = await stripe.prices.create({
       product: starterProduct.id,
-      unit_amount: 6700, // R$ 67,00 em centavos
+      unit_amount: 6700,
       currency: 'brl',
       recurring: { interval: 'month' },
       metadata: { plan_id: 'starter', credits: '50' },
@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
     });
     const growthPrice = await stripe.prices.create({
       product: growthProduct.id,
-      unit_amount: 14700, // R$ 147,00
+      unit_amount: 14700,
       currency: 'brl',
       recurring: { interval: 'month' },
       metadata: { plan_id: 'growth', credits: '120' },
@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
     });
     const proPrice = await stripe.prices.create({
       product: proProduct.id,
-      unit_amount: 29700, // R$ 297,00
+      unit_amount: 29700,
       currency: 'brl',
       recurring: { interval: 'month' },
       metadata: { plan_id: 'pro', credits: '300' },
@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
     });
     const agencyPrice = await stripe.prices.create({
       product: agencyProduct.id,
-      unit_amount: 59700, // R$ 597,00
+      unit_amount: 59700,
       currency: 'brl',
       recurring: { interval: 'month' },
       metadata: { plan_id: 'agency', credits: '750' },
@@ -94,7 +94,7 @@ module.exports = async function handler(req, res) {
     });
     const boosterPrice = await stripe.prices.create({
       product: boosterProduct.id,
-      unit_amount: 3700, // R$ 37,00
+      unit_amount: 3700,
       currency: 'brl',
       metadata: { pack_id: 'booster', credits: '35' },
     });
@@ -108,7 +108,7 @@ module.exports = async function handler(req, res) {
     });
     const sdrPrice = await stripe.prices.create({
       product: sdrProduct.id,
-      unit_amount: 6700, // R$ 67,00
+      unit_amount: 6700,
       currency: 'brl',
       metadata: { pack_id: 'sdr', credits: '80' },
     });
@@ -122,7 +122,7 @@ module.exports = async function handler(req, res) {
     });
     const maquinaPrice = await stripe.prices.create({
       product: maquinaProduct.id,
-      unit_amount: 9700, // R$ 97,00
+      unit_amount: 9700,
       currency: 'brl',
       metadata: { pack_id: 'maquina', credits: '150' },
     });
@@ -136,13 +136,12 @@ module.exports = async function handler(req, res) {
     });
     const escalaPrice = await stripe.prices.create({
       product: escalaProduct.id,
-      unit_amount: 19700, // R$ 197,00
+      unit_amount: 19700,
       currency: 'brl',
       metadata: { pack_id: 'escala', credits: '400' },
     });
     results.STRIPE_PRICE_ESCALA = escalaPrice.id;
 
-    // Retorna todos os price IDs criados
     return res.status(200).json({
       success: true,
       message: '✅ Todos os produtos criados com sucesso! Copie os IDs abaixo e configure nas variáveis de ambiente do Vercel.',
@@ -162,4 +161,4 @@ module.exports = async function handler(req, res) {
       details: error.message,
     });
   }
-};
+}

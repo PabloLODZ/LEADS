@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 function createSupabaseAdmin() {
   return createClient(
@@ -57,7 +57,7 @@ function buildWhatsappUrl(phone) {
   return `https://wa.me/55${cleaned}`;
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido. Use POST.' });
   }
@@ -181,26 +181,17 @@ module.exports = async function handler(req, res) {
     const leadsGenerated = createdLeads.length;
 
     // 5. Atualizar o contador de leads gerados na campanha
-    const { error: campaignError } = await supabase.rpc('increment_campaign_leads', {
-      p_campaign_id: campaignId,
-      p_count: leadsGenerated,
-    });
+    const { data: campaign } = await supabase
+      .from('campaigns')
+      .select('generated_leads')
+      .eq('id', campaignId)
+      .single();
 
-    if (campaignError) {
-      // Fallback: tentar update direto se a RPC não existir
-      console.error('Erro no RPC increment_campaign_leads, tentando update direto:', campaignError);
-      const { data: campaign } = await supabase
+    if (campaign) {
+      await supabase
         .from('campaigns')
-        .select('generated_leads')
-        .eq('id', campaignId)
-        .single();
-
-      if (campaign) {
-        await supabase
-          .from('campaigns')
-          .update({ generated_leads: (campaign.generated_leads || 0) + leadsGenerated })
-          .eq('id', campaignId);
-      }
+        .update({ generated_leads: (campaign.generated_leads || 0) + leadsGenerated })
+        .eq('id', campaignId);
     }
 
     // 6. Deduzir créditos: primeiro de base_credits, depois de purchased_credits
@@ -267,4 +258,4 @@ module.exports = async function handler(req, res) {
     console.error('Erro inesperado em generate-leads:', err);
     return res.status(500).json({ error: 'Erro interno do servidor. Tente novamente mais tarde.' });
   }
-};
+}

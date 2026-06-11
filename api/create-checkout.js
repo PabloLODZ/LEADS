@@ -1,5 +1,5 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { createClient } = require('@supabase/supabase-js');
+import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
 function createSupabaseAdmin() {
   return createClient(
@@ -23,8 +23,7 @@ const PACKS = {
   'escala-total': { price: 19700, credits: 400, name: 'Escala Total' },
 };
 
-async function getOrCreateStripeCustomer(supabase, userId, userEmail) {
-  // Verificar se o usuário já tem um stripe_customer_id salvo
+async function getOrCreateStripeCustomer(stripe, supabase, userId, userEmail) {
   const { data: profile } = await supabase
     .from('profiles')
     .select('stripe_customer_id')
@@ -35,13 +34,11 @@ async function getOrCreateStripeCustomer(supabase, userId, userEmail) {
     return profile.stripe_customer_id;
   }
 
-  // Criar novo customer no Stripe
   const customer = await stripe.customers.create({
     email: userEmail,
     metadata: { userId },
   });
 
-  // Salvar o stripe_customer_id no perfil
   await supabase
     .from('profiles')
     .update({ stripe_customer_id: customer.id })
@@ -50,12 +47,13 @@ async function getOrCreateStripeCustomer(supabase, userId, userEmail) {
   return customer.id;
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido. Use POST.' });
   }
 
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
     const { type, planId, packId, userId, userEmail } = req.body;
 
     if (!type || !userId || !userEmail) {
@@ -82,7 +80,7 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      const customerId = await getOrCreateStripeCustomer(supabase, userId, userEmail);
+      const customerId = await getOrCreateStripeCustomer(stripe, supabase, userId, userEmail);
 
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -119,7 +117,7 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      const customerId = await getOrCreateStripeCustomer(supabase, userId, userEmail);
+      const customerId = await getOrCreateStripeCustomer(stripe, supabase, userId, userEmail);
 
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -158,4 +156,4 @@ module.exports = async function handler(req, res) {
     console.error('Erro inesperado em create-checkout:', err);
     return res.status(500).json({ error: 'Erro interno do servidor. Tente novamente mais tarde.' });
   }
-};
+}
