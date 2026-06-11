@@ -66,11 +66,16 @@ export default function NewCampaignModal({ isOpen, onClose }) {
       const cons = generatePersonalizedLeadMessage({ lead: mockLead, campaign: mockCampaign, userOffer: offer, tone: 'consultivo' });
       const lev = generatePersonalizedLeadMessage({ lead: mockLead, campaign: mockCampaign, userOffer: offer, tone: 'leve' });
 
-      setPreviews({ direto: dir, consultivo: cons, leve: lev });
+      // generatePersonalizedLeadMessage returns an object — extract the string
+      const diretaTxt = dir?.recommendedMessage || dir?.directVersion || '';
+      const consulTxt = cons?.recommendedMessage || cons?.consultativeVersion || '';
+      const leveTxt = lev?.recommendedMessage || lev?.lightVersion || '';
+
+      setPreviews({ direto: diretaTxt, consultivo: consulTxt, leve: leveTxt });
 
       // Default to direct
       if (!selectedMessageText) {
-        setSelectedMessageText(dir);
+        setSelectedMessageText(diretaTxt);
       }
     }
   }, [step, name, offer, tone, segment, location, selectedMessageText]);
