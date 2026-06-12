@@ -14,10 +14,10 @@ import {
 } from '../../utils/formatters.js';
 
 const TABS = [
-  { id: 'respondeu', label: 'Responderam', icon: MessageCircle, color: '#00ff96', urgent: true },
-  { id: 'novo',      label: 'Para abordar', icon: TrendingUp,   color: '#60a5fa' },
-  { id: 'follow_up', label: 'Follow-up',    icon: Clock,        color: '#fbbf24' },
-  { id: 'atrasados', label: 'Atrasados',    icon: AlertTriangle,color: '#f87171' },
+  { id: 'respondeu', label: 'Responderam', icon: MessageCircle, color: 'var(--color-success)', urgent: true },
+  { id: 'novo',      label: 'Para abordar', icon: TrendingUp,   color: 'var(--color-info)' },
+  { id: 'follow_up', label: 'Follow-up',    icon: Clock,        color: 'var(--color-warning)' },
+  { id: 'atrasados', label: 'Atrasados',    icon: AlertTriangle,color: 'var(--color-error)' },
 ];
 
 export default function TodayPage() {
@@ -238,10 +238,10 @@ export default function TodayPage() {
       }}>
         {[
           { label: 'Total', value: totalCount, color: 'var(--green-primary)', onClick: () => navigate('/leads') },
-          { label: 'Responderam', value: queues.respondeu.length, color: '#00ff96', urgent: queues.respondeu.length > 0, onClick: () => setActiveTab('respondeu') },
-          { label: 'Para abordar', value: queues.novo.length, color: '#60a5fa', onClick: () => setActiveTab('novo') },
-          { label: 'Follow-up', value: queues.follow_up.length, color: '#fbbf24', onClick: () => setActiveTab('follow_up') },
-          { label: 'Atrasados', value: queues.atrasados.length, color: '#f87171', onClick: () => setActiveTab('atrasados') },
+          { label: 'Responderam', value: queues.respondeu.length, color: 'var(--color-success)', urgent: queues.respondeu.length > 0, onClick: () => setActiveTab('respondeu') },
+          { label: 'Para abordar', value: queues.novo.length, color: 'var(--color-info)', onClick: () => setActiveTab('novo') },
+          { label: 'Follow-up', value: queues.follow_up.length, color: 'var(--color-warning)', onClick: () => setActiveTab('follow_up') },
+          { label: 'Atrasados', value: queues.atrasados.length, color: 'var(--color-error)', onClick: () => setActiveTab('atrasados') },
           { label: 'Fechados', value: fechadoCount, color: 'var(--green-primary)', onClick: () => navigate('/leads?status=fechado') },
         ].map(s => (
           <button

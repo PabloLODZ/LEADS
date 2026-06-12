@@ -15,15 +15,19 @@ import {
   ChevronRight,
   LogOut,
   CreditCard,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useApp } from '../../contexts/AppContext.jsx';
+import { useTheme } from '../../contexts/ThemeContext.jsx';
 import { getTotalCredits } from '../../utils/creditEngine.js';
 import { getInitials } from '../../utils/formatters.js';
 import { getPlanById } from '../../data/plans.js';
 
 export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCredits }) {
   const { user, isAdmin, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const totalCredits = getTotalCredits(user?.creditWallet);
@@ -142,7 +146,7 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
         </NavLink>
 
         {/* User Card */}
-        <div className="user-card">
+        <div className="user-card" style={{ position: 'relative' }}>
           <div className="user-avatar">
             {getInitials(user?.name)}
           </div>
@@ -152,9 +156,16 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
               {user?.role === 'admin' ? 'Administrador' : user?.role === 'trial' ? 'Trial' : 'Usuário'}
             </div>
           </div>
-          <button className="logout-btn" onClick={handleLogout} title="Sair">
-            <LogOut size={18} />
-          </button>
+          {!collapsed && (
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button className="logout-btn" onClick={toggleTheme} title="Alternar Tema">
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button className="logout-btn" onClick={handleLogout} title="Sair">
+                <LogOut size={18} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </aside>
