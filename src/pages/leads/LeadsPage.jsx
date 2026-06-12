@@ -154,7 +154,7 @@ export default function LeadsPage() {
     { value: 'fechado', label: 'Fechado' },
   ];
 
-  const kanbanColumns = ['novo', 'contactado', 'follow_up', 'respondeu', 'fechado', 'perdido', 'descartado'];
+  const kanbanColumns = ['novo', 'contactado', 'follow_up', 'respondeu', 'fechado'];
 
   return (
     <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>

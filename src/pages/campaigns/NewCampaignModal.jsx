@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
 import { getTotalCredits } from '../../utils/creditEngine.js';
 import { generatePersonalizedLeadMessage } from '../../utils/messageGenerator.js';
+import LeadCaptureLoader from '../../components/LeadCaptureLoader.jsx';
 
 export default function NewCampaignModal({ isOpen, onClose }) {
   const { createCampaign, generateLeadsForCampaign } = useApp();
@@ -14,6 +15,7 @@ export default function NewCampaignModal({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
+  const [isCapturing, setIsCapturing] = useState(false);
 
   // Form states
   // Step 1
@@ -126,15 +128,20 @@ export default function NewCampaignModal({ isOpen, onClose }) {
       };
 
       const newCampaign = await createCampaign(campaignData);
-      toast.info('Buscando leads', 'Nossa IA está garimpando leads qualificados para sua campanha...');
-      
+
+      // Show animated loader while capturing leads
+      setIsCapturing(true);
+
       // Generate leads using Google Places API
-      await generateLeadsForCampaign(newCampaign, desiredCount);
-      
-      toast.success('Campanha iniciada!', `Garimpamos ${desiredCount} leads com score otimizado.`);
+      const capturedLeads = await generateLeadsForCampaign(newCampaign, desiredCount);
+
+      setIsCapturing(false);
+
+      const found = capturedLeads?.length ?? 0;
+      toast.success('Campanha iniciada!', `${found} lead${found !== 1 ? 's' : ''} encontrado${found !== 1 ? 's' : ''} e adicionado${found !== 1 ? 's' : ''} à sua lista!`);
       onClose();
       navigate(`/leads?campaignId=${newCampaign.id}`);
-      
+
       // Reset state
       setStep(1);
       setName('');
@@ -145,6 +152,7 @@ export default function NewCampaignModal({ isOpen, onClose }) {
       setDesiredCount(20);
       setSelectedMessageText('');
     } catch (err) {
+      setIsCapturing(false);
       toast.error('Erro ao criar campanha', err.message || 'Ocorreu um problema ao iniciar a prospecção.');
     }
   };
@@ -155,7 +163,17 @@ export default function NewCampaignModal({ isOpen, onClose }) {
   const customizationLevels = ['leve', 'normal', 'alta'];
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <>
+      {/* Loader de captação de leads */}
+      {isCapturing && (
+        <LeadCaptureLoader
+          segment={segment}
+          location={location}
+          count={desiredCount}
+        />
+      )}
+
+    <div className="modal-overlay" onClick={isCapturing ? undefined : onClose}>
       <div className="modal modal-lg" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '750px' }}>
         <div className="modal-header">
           <div>
@@ -546,5 +564,6 @@ export default function NewCampaignModal({ isOpen, onClose }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
