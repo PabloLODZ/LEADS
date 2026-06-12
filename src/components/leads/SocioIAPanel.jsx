@@ -8,12 +8,12 @@ import { useToast } from '../../contexts/ToastContext.jsx';
 import { useApp } from '../../contexts/AppContext.jsx';
 
 const MESSAGE_TYPES = [
-  { id: 'primeira_abordagem', label: '🚀 Primeira abordagem', description: 'Para leads ainda não contactados' },
-  { id: 'followup_educado',   label: '📩 Follow-up educado',  description: 'Depois de uma mensagem sem resposta' },
-  { id: 'lead_frio',         label: '❄️ Lead frio',          description: 'Sem resposta há vários dias' },
-  { id: 'direta',            label: '⚡ Mensagem direta',    description: 'Objetiva, sem rodeios' },
-  { id: 'objecao_preco',     label: '💰 Objeção de preço',   description: 'Lead disse que está caro' },
-  { id: 'whatsapp_curta',    label: '📱 WhatsApp curta',     description: 'Máximo 3 linhas, ideal p/ WA' },
+  { id: 'primeira_abordagem', label: '🚀 Primeira abordagem', description: 'Para leads ainda não contactados', premium: false },
+  { id: 'direta',            label: '⚡ Mensagem direta',    description: 'Objetiva, sem rodeios', premium: false },
+  { id: 'whatsapp_curta',    label: '📱 WhatsApp curta',     description: 'Máximo 3 linhas, ideal p/ WA', premium: false },
+  { id: 'followup_educado',   label: '📩 Follow-up educado',  description: 'Depois de uma mensagem sem resposta', premium: true },
+  { id: 'lead_frio',         label: '❄️ Lead frio',          description: 'Sem resposta há vários dias', premium: true },
+  { id: 'objecao_preco',     label: '💰 Objeção de preço',   description: 'Lead disse que está caro', premium: true },
 ];
 
 const FEEDBACK_OPTIONS = [
@@ -25,7 +25,7 @@ const FEEDBACK_OPTIONS = [
 ];
 
 export default function SocioIAPanel({ lead, campaign }) {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const toast = useToast();
   const { addInteraction } = useApp();
 
@@ -38,6 +38,18 @@ export default function SocioIAPanel({ lead, campaign }) {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
   const selectedTypeDef = MESSAGE_TYPES.find(t => t.id === selectedType);
+  const isStarter = user?.planId === 'starter' && !isAdmin;
+
+  const handleTypeSelect = (type) => {
+    if (type.premium && isStarter) {
+      toast.error('Recurso Premium', 'Faça upgrade para acessar tons avançados de negociação.');
+      return;
+    }
+    setSelectedType(type.id);
+    setShowTypeDropdown(false);
+    setGeneratedMessage('');
+    setFeedbackGiven(null);
+  };
 
   const handleGenerate = async () => {
     if (!lead?.id || !user?.id) return;
@@ -174,21 +186,29 @@ export default function SocioIAPanel({ lead, campaign }) {
             borderRadius: 'var(--radius-md)', overflow: 'hidden',
             boxShadow: 'var(--shadow-lg)', marginTop: '4px',
           }}>
-            {MESSAGE_TYPES.map(type => (
-              <button
-                key={type.id}
-                onClick={() => { setSelectedType(type.id); setShowTypeDropdown(false); setGeneratedMessage(''); setFeedbackGiven(null); }}
-                style={{
-                  width: '100%', textAlign: 'left', padding: '10px 12px',
-                  background: selectedType === type.id ? 'var(--green-active)' : 'transparent',
-                  border: 'none', cursor: 'pointer', borderBottom: '1px solid var(--border-subtle)',
-                  color: selectedType === type.id ? 'var(--green-primary)' : 'var(--text-primary)',
-                }}
-              >
-                <div style={{ fontWeight: '600', fontSize: '13px' }}>{type.label}</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{type.description}</div>
-              </button>
-            ))}
+            {MESSAGE_TYPES.map(type => {
+              const isLocked = type.premium && isStarter;
+              return (
+                <button
+                  key={type.id}
+                  onClick={() => handleTypeSelect(type)}
+                  style={{
+                    width: '100%', textAlign: 'left', padding: '10px 12px',
+                    background: selectedType === type.id ? 'var(--green-active)' : 'transparent',
+                    border: 'none', cursor: isLocked ? 'not-allowed' : 'pointer', borderBottom: '1px solid var(--border-subtle)',
+                    color: selectedType === type.id ? 'var(--green-primary)' : 'var(--text-primary)',
+                    opacity: isLocked ? 0.6 : 1,
+                  }}
+                  title={isLocked ? 'Exclusivo Plano Growth ou superior' : ''}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ fontWeight: '600', fontSize: '13px' }}>{type.label}</div>
+                    {isLocked && <div style={{ fontSize: '10px', background: 'var(--bg-app)', padding: '2px 4px', borderRadius: '4px', color: 'var(--text-muted)' }}>PRO</div>}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{type.description}</div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -196,13 +216,20 @@ export default function SocioIAPanel({ lead, campaign }) {
       {/* Custom instruction toggle */}
       <div style={{ marginBottom: 'var(--space-md)' }}>
         <button
-          onClick={() => setShowCustom(!showCustom)}
-          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+          onClick={() => {
+            if (isStarter) {
+              toast.error('Recurso Premium', 'Instruções personalizadas são exclusivas dos planos avançados.');
+              return;
+            }
+            setShowCustom(!showCustom);
+          }}
+          style={{ background: 'none', border: 'none', color: isStarter ? 'var(--text-muted)' : 'var(--text-muted)', fontSize: '12px', cursor: isStarter ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px', opacity: isStarter ? 0.6 : 1 }}
         >
           <MessageSquare size={12} />
           {showCustom ? 'Ocultar instrução personalizada' : 'Adicionar instrução personalizada'}
+          {isStarter && <span style={{ fontSize: '10px', background: 'var(--bg-app)', padding: '2px 4px', borderRadius: '4px', color: 'var(--text-muted)', marginLeft: '4px' }}>PRO</span>}
         </button>
-        {showCustom && (
+        {showCustom && !isStarter && (
           <textarea
             className="form-input"
             style={{ marginTop: '8px', fontSize: '13px', minHeight: '60px', resize: 'none' }}

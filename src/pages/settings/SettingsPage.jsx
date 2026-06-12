@@ -14,6 +14,7 @@ export default function SettingsPage() {
   const toast = useToast();
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [upgradingPlan, setUpgradingPlan] = useState(null);
+  const [managingSubscription, setManagingSubscription] = useState(false);
 
   // Reminders states
   const [whatsappPhone, setWhatsappPhone] = useState(user?.whatsappPhone || '');
@@ -50,6 +51,28 @@ export default function SettingsPage() {
     }
   };
 
+  const handleManageSubscription = async () => {
+    if (!user?.id) return;
+    setManagingSubscription(true);
+    try {
+      const response = await fetch('/api/create-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.portalUrl) {
+        window.location.href = data.portalUrl;
+      } else {
+        throw new Error(data.error || 'Erro ao abrir o portal do cliente.');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Erro ao acessar o gerenciamento da assinatura.');
+      setManagingSubscription(false);
+    }
+  };
+
   return (
     <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>
       {/* Top Header */}
@@ -80,8 +103,13 @@ export default function SettingsPage() {
                 Cobrança ativa via Stripe. Atualize o cartão e verifique faturas no painel seguro.
               </p>
             </div>
-            <button className="btn btn-secondary btn-block" style={{ marginTop: 'var(--space-lg)' }} onClick={() => window.open('https://billing.stripe.com', '_blank')}>
-              Gerenciar assinatura
+            <button 
+              className="btn btn-secondary btn-block" 
+              style={{ marginTop: 'var(--space-lg)' }} 
+              onClick={handleManageSubscription}
+              disabled={managingSubscription}
+            >
+              {managingSubscription ? 'Abrindo portal...' : 'Gerenciar assinatura'}
             </button>
           </div>
 

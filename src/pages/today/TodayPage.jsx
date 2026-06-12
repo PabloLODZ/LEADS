@@ -92,62 +92,57 @@ export default function TodayPage() {
 
     return (
       <div style={{
-        display: 'flex', alignItems: 'center', gap: '14px',
-        padding: '14px 16px',
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border-primary)',
-        borderRadius: 'var(--radius-lg)',
-        transition: 'border-color .15s',
-      }}>
-        {/* Score badge */}
+        display: 'flex', alignItems: 'center', gap: '16px',
+        padding: '12px 16px',
+        background: 'var(--bg-primary)', /* Clean background */
+        borderBottom: '1px solid var(--border-primary)', /* Simple list style instead of card */
+        transition: 'background-color .15s',
+      }}
+      className="hover-bg-card"
+      >
+        {/* Minimal Score badge */}
         <div style={{
-          flexShrink: 0, width: '40px', height: '40px',
-          borderRadius: '10px', display: 'flex',
-          alignItems: 'center', justifyContent: 'center',
-          background: score === 'high' ? 'rgba(0,255,150,.12)' :
-                      score === 'medium' ? 'rgba(251,191,36,.12)' : 'rgba(248,113,113,.10)',
-          fontSize: '13px', fontWeight: '800',
-          color: score === 'high' ? 'var(--green-primary)' :
-                 score === 'medium' ? '#fbbf24' : '#f87171',
-        }}>
-          {lead.score}
-        </div>
+          flexShrink: 0, width: '8px', height: '8px',
+          borderRadius: '50%',
+          background: score === 'high' ? 'var(--green-primary)' :
+                      score === 'medium' ? '#fbbf24' : '#f87171',
+        }} title={`Score: ${lead.score}`} />
 
         {/* Main info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+            <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '250px' }}>
               {lead.name}
             </span>
             {lead.city && (
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                📍 {lead.city}
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                · {lead.city}
               </span>
             )}
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-            {getCampaignName(lead.campaignId)} · {formatRelativeDate(lead.updatedAt)}
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+            {getCampaignName(lead.campaignId)} · atualizado {formatRelativeDate(lead.updatedAt)}
           </div>
         </div>
 
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        {/* Actions - minimalist */}
+        <div style={{ display: 'flex', gap: '8px', flexShrink: 0, alignItems: 'center' }}>
           {lead.personalizedMessage && (
-            <button className="btn btn-ghost btn-sm" style={{ fontSize: '12px', padding: '5px 10px' }} onClick={() => copyMsg(lead)}>
-              <Copy size={12} /> Copiar
+            <button className="btn btn-ghost btn-sm" style={{ padding: '6px' }} onClick={() => copyMsg(lead)} title="Copiar mensagem">
+              <Copy size={14} />
             </button>
           )}
 
           {lead.whatsappUrl && (
-            <button className="btn btn-ghost btn-sm" style={{ fontSize: '12px', padding: '5px 10px', color: '#25D366' }} onClick={() => openWhatsApp(lead)}>
-              <ExternalLink size={12} /> WhatsApp
+            <button className="btn btn-ghost btn-sm" style={{ padding: '6px', color: '#25D366' }} onClick={() => openWhatsApp(lead)} title="Abrir WhatsApp">
+              <MessageCircle size={14} />
             </button>
           )}
 
           {tab === 'novo' && (
             <button
-              className="btn btn-sm btn-secondary"
-              style={{ fontSize: '12px', padding: '5px 10px' }}
+              className="btn btn-sm btn-ghost"
+              style={{ fontSize: '12px', padding: '6px 12px' }}
               disabled={busy('contactado')}
               onClick={() => markStatus(lead, 'contactado', 'Contactado')}
             >
@@ -167,33 +162,18 @@ export default function TodayPage() {
           )}
 
           {tab === 'follow_up' && (
-            <button
-              className="btn btn-sm btn-secondary"
-              style={{ fontSize: '12px', padding: '5px 10px' }}
-              disabled={busy('respondeu')}
-              onClick={() => markStatus(lead, 'respondeu', 'Respondeu')}
-            >
-              <MessageCircle size={12} /> {busy('respondeu') ? '...' : 'Respondeu'}
+            <button className="btn btn-sm btn-ghost" style={{ fontSize: '12px', padding: '6px 12px' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')}>
+              {busy('_cont') ? '...' : <><MessageCircle size={12} style={{ marginRight: '4px' }} /> Novo FUP</>}
             </button>
           )}
 
           {tab === 'atrasados' && (
-            <button
-              className="btn btn-sm btn-secondary"
-              style={{ fontSize: '12px', padding: '5px 10px' }}
-              disabled={busy('follow_up')}
-              onClick={() => markStatus(lead, 'follow_up', 'Follow-up')}
-            >
-              <RefreshCw size={12} /> {busy('follow_up') ? '...' : 'Reativar'}
+            <button className="btn btn-sm btn-ghost" style={{ fontSize: '12px', padding: '6px 12px' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')}>
+              {busy('_cont') ? '...' : <><MessageCircle size={12} style={{ marginRight: '4px' }} /> FUP</>}
             </button>
           )}
 
-          <button
-            className="btn btn-ghost btn-sm"
-            style={{ padding: '5px 7px' }}
-            onClick={() => navigate(`/leads?id=${lead.id}`)}
-            title="Ver detalhes"
-          >
+          <button className="btn btn-ghost btn-sm" style={{ padding: '4px' }} onClick={() => navigate(`/leads?id=${lead.id}`)}>
             <ChevronRight size={14} />
           </button>
         </div>
@@ -201,7 +181,6 @@ export default function TodayPage() {
     );
   };
 
-  // ---------- Empty state ----------
   if (totalCount === 0) {
     return (
       <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>
@@ -229,146 +208,84 @@ export default function TodayPage() {
     <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>
       <Header greeting={greeting} userName={userName} dayOfWeek={dayOfWeek} formattedDate={formattedDate} onNew={() => navigate('/campanhas')} />
 
-      {/* ---- Stats compactos ---- */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
-        gap: '10px',
-        marginBottom: '24px',
-      }}>
-        {[
-          { label: 'Total', value: totalCount, color: 'var(--green-primary)', onClick: () => navigate('/leads') },
-          { label: 'Responderam', value: queues.respondeu.length, color: 'var(--color-success)', urgent: queues.respondeu.length > 0, onClick: () => setActiveTab('respondeu') },
-          { label: 'Para abordar', value: queues.novo.length, color: 'var(--color-info)', onClick: () => setActiveTab('novo') },
-          { label: 'Follow-up', value: queues.follow_up.length, color: 'var(--color-warning)', onClick: () => setActiveTab('follow_up') },
-          { label: 'Atrasados', value: queues.atrasados.length, color: 'var(--color-error)', onClick: () => setActiveTab('atrasados') },
-          { label: 'Fechados', value: fechadoCount, color: 'var(--green-primary)', onClick: () => navigate('/leads?status=fechado') },
-        ].map(s => (
-          <button
-            key={s.label}
-            onClick={s.onClick}
-            style={{
-              background: 'var(--bg-card)',
-              border: `1px solid ${s.urgent ? s.color : 'var(--border-primary)'}`,
-              borderRadius: 'var(--radius-lg)',
-              padding: '12px 10px',
-              cursor: 'pointer',
-              textAlign: 'center',
-              transition: 'all .15s',
-              outline: 'none',
-            }}
-          >
-            <div style={{ fontSize: '22px', fontWeight: '800', color: s.value > 0 ? s.color : 'var(--text-muted)', lineHeight: 1 }}>
-              {s.value}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', fontWeight: '500' }}>
-              {s.label}
-            </div>
-          </button>
-        ))}
-      </div>
+      {/* Content wrapper */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 'var(--space-2xl)', marginTop: 'var(--space-xl)' }}>
+        {/* Left Column: Tasks */}
+        <div>
+          {/* Custom Tabs */}
+          <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-xl)', overflowX: 'auto', paddingBottom: '8px' }}>
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const count = queues[tab.id].length;
+              if (count === 0 && tab.id === 'atrasados') return null;
 
-      {/* ---- Tabs ---- */}
-      <div style={{
-        display: 'flex', gap: '4px',
-        background: 'var(--bg-card-secondary)',
-        border: '1px solid var(--border-primary)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '4px',
-        marginBottom: '16px',
-        overflowX: 'auto',
-      }}>
-        {TABS.map(tab => {
-          const count = queues[tab.id]?.length || 0;
-          const isActive = activeTab === tab.id;
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                flex: 1, minWidth: '100px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                padding: '9px 12px',
-                borderRadius: 'var(--radius-md)',
-                border: 'none',
-                background: isActive ? 'var(--bg-card)' : 'transparent',
-                color: isActive ? tab.color : 'var(--text-muted)',
-                fontWeight: isActive ? '700' : '500',
-                fontSize: '13px',
-                cursor: 'pointer',
-                transition: 'all .15s',
-                boxShadow: isActive ? '0 1px 4px rgba(0,0,0,.25)' : 'none',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <Icon size={14} />
-              {tab.label}
-              {count > 0 && (
-                <span style={{
-                  background: isActive ? tab.color : 'var(--bg-card)',
-                  color: isActive ? '#000' : 'var(--text-muted)',
-                  fontSize: '11px', fontWeight: '700',
-                  borderRadius: '99px', padding: '1px 7px',
-                  minWidth: '20px', textAlign: 'center',
-                }}>
-                  {count}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ---- Lista da aba ativa ---- */}
-      {activeLeads.length === 0 ? (
-        <div className="card" style={{ textAlign: 'center', padding: 'var(--space-2xl)' }}>
-          {activeTab === 'atrasados' ? (
-            <>
-              <Check size={28} style={{ color: 'var(--green-primary)', marginBottom: '10px' }} />
-              <p style={{ fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>Nenhum lead atrasado!</p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Todos os leads estão sendo acompanhados em dia.</p>
-            </>
-          ) : (
-            <>
-              <activeTabDef.icon size={28} style={{ color: 'var(--text-muted)', marginBottom: '10px' }} />
-              <p style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>Nenhum lead aqui</p>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-                {activeTab === 'novo' && 'Crie uma campanha para garimpar novos leads.'}
-                {activeTab === 'respondeu' && 'Ninguém respondeu ainda — continue abordando!'}
-                {activeTab === 'follow_up' && 'Sem follow-ups pendentes por enquanto.'}
-              </p>
-              {activeTab === 'novo' && (
-                <button className="btn btn-primary btn-sm" style={{ marginTop: '14px' }} onClick={() => navigate('/campanhas')}>
-                  <Plus size={13} /> Nova campanha
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '10px 20px',
+                    background: isActive ? 'var(--bg-card)' : 'transparent',
+                    border: '1px solid',
+                    borderColor: isActive ? tab.color : 'transparent',
+                    borderRadius: 'var(--radius-full)',
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: 'pointer', transition: 'all 0.2s',
+                    fontSize: '14px', fontWeight: '600',
+                  }}
+                >
+                  {tab.urgent && count > 0 && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-error)' }} />}
+                  <tab.icon size={16} color={isActive ? tab.color : 'currentColor'} />
+                  {tab.label}
+                  <span style={{
+                    background: isActive ? `${tab.color}20` : 'var(--bg-hover)',
+                    color: isActive ? tab.color : 'inherit',
+                    padding: '2px 8px', borderRadius: '10px', fontSize: '12px',
+                  }}>
+                    {count}
+                  </span>
                 </button>
-              )}
-            </>
-          )}
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {activeLeads.slice(0, 15).map(lead => (
-            <LeadCard key={lead.id} lead={lead} tab={activeTab} />
-          ))}
-          {activeLeads.length > 15 && (
-            <button
-              className="btn btn-ghost"
-              style={{ color: 'var(--text-muted)', fontSize: '13px' }}
-              onClick={() => navigate(`/leads?status=${activeTab === 'atrasados' ? 'follow_up' : activeTab}`)}
-            >
-              Ver todos os {activeLeads.length} leads <ChevronRight size={13} />
-            </button>
-          )}
-        </div>
-      )}
+              );
+            })}
+          </div>
 
-      {/* Link rápido para todos */}
-      <div style={{ textAlign: 'center', marginTop: '24px' }}>
-        <button className="btn btn-ghost" style={{ color: 'var(--text-muted)', fontSize: '12px' }} onClick={() => navigate('/leads')}>
-          <Users size={13} style={{ marginRight: '4px' }} />
-          Ver todos os {totalCount} leads
-        </button>
+          {/* List area */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+            {activeLeads.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 'var(--space-4xl) 0', color: 'var(--text-muted)' }}>
+                <Check size={48} style={{ color: 'var(--green-primary)', opacity: 0.5, margin: '0 auto var(--space-lg)' }} />
+                <p>Tudo limpo por aqui! Nenhuma tarefa pendente nesta fila.</p>
+              </div>
+            ) : (
+              activeLeads.map(lead => <LeadCard key={lead.id} lead={lead} tab={activeTab} />)
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Mini Stats */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+           <div style={{ background: 'var(--bg-card-secondary)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-lg)', border: '1px solid var(--border-primary)' }}>
+             <h4 style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+               <Target size={14} color="var(--green-primary)" />
+               Visão Geral
+             </h4>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Total de Leads</span>
+                  <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{totalCount}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Fechados</span>
+                  <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-success)' }}>{fechadoCount}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Para abordar</span>
+                  <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-info)' }}>{queues.novo.length}</span>
+                </div>
+             </div>
+           </div>
+        </div>
       </div>
     </div>
   );

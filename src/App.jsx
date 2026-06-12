@@ -11,6 +11,7 @@ import AppLayout from './components/layout/AppLayout.jsx';
 import LoginPage from './pages/auth/LoginPage.jsx';
 import RegisterPage from './pages/auth/RegisterPage.jsx';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage.jsx';
+import SubscriptionGuard from './components/auth/SubscriptionGuard.jsx';
 
 // App pages
 import TodayPage from './pages/today/TodayPage.jsx';
@@ -67,7 +68,7 @@ function AppRoutes() {
       <Route path="/recuperar-senha" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
 
       {/* Private routes with layout */}
-      <Route path="/" element={<PrivateRoute><AppLayout /></PrivateRoute>}>
+      <Route path="/" element={<PrivateRoute><SubscriptionGuard><AppLayout /></SubscriptionGuard></PrivateRoute>}>
         <Route index element={<Navigate to="/hoje" replace />} />
         <Route path="hoje" element={<TodayPage />} />
         <Route path="campanhas" element={<CampaignsPage />} />

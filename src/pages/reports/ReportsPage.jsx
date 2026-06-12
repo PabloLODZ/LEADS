@@ -75,8 +75,10 @@ function MiniBar({ label, value, maxValue, color }) {
 
 export default function ReportsPage() {
   const { leads, campaigns, creditTransactions, interactions } = useApp();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const isStarter = user?.planId === 'starter' && !isAdmin;
 
   const [period, setPeriod] = useState('30d');
   const [campaignFilter, setCampaignFilter] = useState('todos');
@@ -227,17 +229,58 @@ export default function ReportsPage() {
       )}
 
       {/* KPI Grid */}
-      <div className="stats-grid" style={{ marginBottom: 'var(--space-2xl)' }}>
-        <KpiCard icon={Users} label="Total de Leads" value={totalLeads} color="var(--green-primary)" onClick={() => navigate('/leads')} />
-        <KpiCard icon={Target} label="Novos" value={novos} color="var(--color-info)" onClick={() => navigate('/leads?status=novo')} />
-        <KpiCard icon={MessageCircle} label="Abordados" value={abordados} color="var(--color-warning)" onClick={() => navigate('/leads?status=contactado')} />
-        <KpiCard icon={TrendingUp} label="Responderam" value={responderam} color="var(--color-info)" sub={`${taxaResposta}% de resposta`} />
-        <KpiCard icon={BarChart3} label="Em Negociação" value={negociacao} color="var(--color-warning)" />
-        <KpiCard icon={CheckCircle} label="Fechados" value={fechados} color="var(--color-success)" sub={`${taxaConversao}% de conversão`} onClick={() => navigate('/leads?status=fechado')} />
-        <KpiCard icon={XCircle} label="Perdidos" value={perdidos} color="var(--color-error)" onClick={() => navigate('/leads?status=perdido')} />
-        <KpiCard icon={CreditCard} label="Créditos usados" value={creditosConsumidos} color="var(--color-warning)" />
-        <KpiCard icon={Sparkles} label="Mensagens IA" value={mensagensIA} color="var(--green-primary)" />
+      <div className="stats-grid" style={{ marginBottom: 'var(--space-2xl)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-lg)' }}>
+        <KpiCard
+          icon={Users}
+          label="Leads Gerados"
+          value={totalLeads}
+          color="var(--color-primary)"
+          onClick={() => navigate('/leads')}
+        />
+        <KpiCard
+          icon={Target}
+          label="Abordados"
+          value={abordados}
+          color="var(--color-info)"
+          onClick={() => navigate(`/leads?status=contactado`)}
+        />
+        <KpiCard
+          icon={MessageCircle}
+          label="Respostas"
+          value={responderam}
+          color="var(--color-warning)"
+          sub={`${taxaResposta}% de conversão`}
+          onClick={() => navigate(`/leads?status=respondeu`)}
+        />
+        <KpiCard
+          icon={CheckCircle}
+          label="Fechados (Ganho)"
+          value={fechados}
+          color="var(--green-primary)"
+          sub={`${taxaConversao}% win rate global`}
+          onClick={() => navigate(`/leads?status=fechado`)}
+        />
       </div>
+
+      {isStarter ? (
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-3xl)', textAlign: 'center', background: 'var(--bg-card-secondary)' }}>
+          <Sparkles size={32} style={{ color: 'var(--color-warning)', marginBottom: 'var(--space-md)' }} />
+          <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: '700', marginBottom: 'var(--space-sm)' }}>Desbloqueie Relatórios Avançados</h3>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '400px', marginBottom: 'var(--space-lg)' }}>
+            Faça upgrade para Growth ou superior para acessar métricas avançadas, performance de campanhas, motivos de perda e exportações de dados.
+          </p>
+          <button className="btn btn-primary" onClick={() => navigate('/configuracoes')}>Fazer Upgrade</button>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--space-xl)', marginBottom: 'var(--space-2xl)' }}>
+          <KpiCard icon={TrendingUp} label="Responderam" value={responderam} color="var(--color-info)" sub={`${taxaResposta}% de resposta`} />
+          <KpiCard icon={BarChart3} label="Em Negociação" value={negociacao} color="var(--color-warning)" />
+          <KpiCard icon={CheckCircle} label="Fechados" value={fechados} color="var(--color-success)" sub={`${taxaConversao}% de conversão`} onClick={() => navigate('/leads?status=fechado')} />
+          <KpiCard icon={XCircle} label="Perdidos" value={perdidos} color="var(--color-error)" onClick={() => navigate('/leads?status=perdido')} />
+          <KpiCard icon={CreditCard} label="Créditos usados" value={creditosConsumidos} color="var(--color-warning)" />
+          <KpiCard icon={Sparkles} label="Mensagens IA" value={mensagensIA} color="var(--green-primary)" />
+        </div>
+      )}
 
       {/* Bottom Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--space-xl)' }}>

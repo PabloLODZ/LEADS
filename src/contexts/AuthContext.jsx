@@ -112,6 +112,13 @@ export function AuthProvider({ children }) {
         throw new Error('Erro ao criar conta. Tente novamente.');
       }
 
+      // Disparar envio do e-mail de boas-vindas assincronamente (sem bloquear o fluxo)
+      fetch('/api/send-welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name }),
+      }).catch(err => console.error('Erro ao enviar email de boas vindas:', err));
+
       // Profile is auto-created by the database trigger (handle_new_user)
       // Wait a moment for the trigger to execute, then fetch
       await new Promise(r => setTimeout(r, 500));

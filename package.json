@@ -19,6 +19,7 @@
     "lucide-react": "^0.469.0",
     "react-router-dom": "^7.17.0",
     "recharts": "^3.8.1",
+    "resend": "^6.12.4",
     "stripe": "^22.2.0"
   }
 }

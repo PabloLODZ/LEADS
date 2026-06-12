@@ -15,16 +15,37 @@ import {
   Calendar,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext.jsx';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
 import { formatDate, getStatusColor, getStatusLabel } from '../../utils/formatters.js';
 import NewCampaignModal from './NewCampaignModal.jsx';
 
+const PLAN_CAMPAIGN_LIMITS = {
+  starter: 1,
+  growth: 3,
+  pro: 10,
+  agency: Infinity,
+};
+
 export default function CampaignsPage() {
+  const { user, isAdmin } = useAuth();
   const { campaigns, leads, updateCampaign, deleteCampaign, createCampaign } = useApp();
   const toast = useToast();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
+  const planLimit = isAdmin ? Infinity : (PLAN_CAMPAIGN_LIMITS[user?.planId] || 0);
+  const activeCampaignsCount = campaigns.filter(c => c.status === 'ativa').length;
+
+  const handleOpenNewCampaign = () => {
+    if (activeCampaignsCount >= planLimit) {
+      toast.error('Limite de campanhas atingido', `Seu plano atual (${user?.planId || 'Inativo'}) permite até ${planLimit} campanha(s) ativa(s). Faça upgrade para criar mais.`);
+      navigate('/configuracoes');
+      return;
+    }
+    setModalOpen(true);
+  };
 
   const getCampaignStats = (campaignId) => {
     const campLeads = leads.filter((l) => l.campaignId === campaignId);
@@ -91,7 +112,7 @@ export default function CampaignsPage() {
             Campanhas
           </h1>
         </div>
-        <button className="btn btn-primary" onClick={() => setModalOpen(true)}>
+        <button className="btn btn-primary" onClick={handleOpenNewCampaign}>
           <Plus size={16} style={{ marginRight: '8px' }} />
           Nova campanha
         </button>
@@ -102,7 +123,7 @@ export default function CampaignsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--space-lg)' }}>
           <div
             className="card card-dashed"
-            onClick={() => setModalOpen(true)}
+            onClick={handleOpenNewCampaign}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -125,7 +146,7 @@ export default function CampaignsPage() {
           {/* Add Campaign creation card in list */}
           <div
             className="card card-dashed"
-            onClick={() => setModalOpen(true)}
+            onClick={handleOpenNewCampaign}
             style={{
               display: 'flex',
               flexDirection: 'column',

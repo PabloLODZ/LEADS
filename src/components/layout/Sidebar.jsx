@@ -114,37 +114,30 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
       </nav>
 
       {/* Footer */}
-      <div className="sidebar-footer">
-        {/* Credit Card */}
-        <div className="credit-card">
-          <div className="credit-card-header">
-            <span className="credit-card-title">CRÉDITOS</span>
-            <CreditCard size={14} style={{ color: 'var(--text-muted)' }} />
+      <div className="sidebar-footer" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+        {/* Simplified Credit Card */}
+        <div style={{ padding: '12px', background: 'var(--bg-card-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)' }}>CRÉDITOS</span>
+            <Zap size={14} style={{ color: 'var(--green-primary)' }} />
           </div>
-          <div className="credit-card-amount">
-            {isAdmin ? 'Ilimitado' : totalCredits}
+          <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
+            {isAdmin ? 'Ilimitado' : totalCredits} <span style={{ fontSize: '11px', fontWeight: '400', color: 'var(--text-muted)' }}>restantes</span>
           </div>
-          <div className="credit-progress">
-            <div
-              className="credit-progress-bar"
-              style={{ width: isAdmin ? '100%' : `${Math.max(0, 100 - usedPercent)}%` }}
-            />
-          </div>
-          <div className="credit-card-text">
-            {isAdmin ? 'Acesso administrador' : `${remainingCredits} leads restantes`}
-          </div>
-          <button className="btn btn-primary btn-sm btn-block" onClick={onBuyCredits}>
-            Mais leads
-          </button>
+          {!isAdmin && (
+            <div style={{ width: '100%', height: '4px', background: 'var(--bg-hover)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
+              <div style={{ width: `${Math.max(0, 100 - usedPercent)}%`, height: '100%', background: 'var(--green-primary)' }} />
+            </div>
+          )}
         </div>
 
-        {/* Plan Card */}
-        <NavLink to="/configuracoes" className="plan-card" style={{ textDecoration: 'none' }}>
-          <Zap size={18} />
-          <div className="plan-card-info">
-            <div className="plan-card-name">{plan?.name || 'Starter'}</div>
+        {/* Simplified Plan Link */}
+        <NavLink to="/configuracoes" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'transparent', borderRadius: 'var(--radius-md)', textDecoration: 'none', color: 'var(--text-secondary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Shield size={14} />
+            <span style={{ fontSize: '13px', fontWeight: '500' }}>Plano {plan?.name || 'Starter'}</span>
           </div>
-          <ChevronRight size={16} className="chevron" />
+          <ChevronRight size={14} />
         </NavLink>
 
         {/* User Card */}
