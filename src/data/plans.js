@@ -6,12 +6,11 @@ export const PLANS = [
     includedCredits: 50,
     extraLeadPrice: 1.05,
     features: [
-      '50 créditos inclusos',
-      'Campanhas ilimitadas',
-      'CRM completo',
-      'Assistente Sócio',
-      'Exportação CSV',
-      'Suporte por email'
+      '50 créditos / mês',
+      '1 Campanha Ativa',
+      'Sócio IA: Básico',
+      'Relatórios: Bloqueado',
+      'Exportação CSV: Bloqueado',
     ],
     isActive: true,
   },
@@ -23,11 +22,11 @@ export const PLANS = [
     extraLeadPrice: 0.83,
     discount: '21% off',
     features: [
-      '120 créditos inclusos',
-      'Tudo do Starter',
-      'Lead extra a R$ 0,83',
-      'Pacotes SDR Júnior',
-      'Suporte prioritário'
+      '120 créditos / mês',
+      '3 Campanhas Ativas',
+      'Sócio IA: Tons de Voz',
+      'Relatórios: Parcial',
+      'Exportação CSV: Bloqueado',
     ],
     isActive: true,
   },
@@ -40,11 +39,11 @@ export const PLANS = [
     discount: '39% off',
     popular: true,
     features: [
-      '300 créditos inclusos',
-      'Tudo do Growth',
-      'Lead extra a R$ 0,64',
-      'Pacotes Máquina de Vendas',
-      'Suporte dedicado'
+      '300 créditos / mês',
+      '10 Campanhas Ativas',
+      'Sócio IA: Customizável',
+      'Relatórios: Completos',
+      'Exportação CSV: Liberado',
     ],
     isActive: true,
   },
@@ -56,11 +55,11 @@ export const PLANS = [
     extraLeadPrice: 0.49,
     discount: '60% off',
     features: [
-      '750 créditos inclusos',
-      'Tudo do Pro',
-      'Lead extra a R$ 0,49',
-      'Pacotes Escala Total',
-      'Gerente de contas dedicado'
+      '750 créditos / mês',
+      'Campanhas Ilimitadas',
+      'Sócio IA: VIP',
+      'Tudo Liberado',
+      'Gerente de Contas',
     ],
     isActive: true,
   }

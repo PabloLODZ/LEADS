@@ -58,6 +58,11 @@ export default function CampaignsPage() {
   };
 
   const handleToggleStatus = async (campaign) => {
+    if (campaign.status !== 'ativa' && activeCampaignsCount >= planLimit) {
+      toast.error('Limite excedido', `Você já atingiu o limite de ${planLimit} campanha(s) ativa(s). Pause outra campanha ou faça upgrade.`);
+      navigate('/configuracoes');
+      return;
+    }
     const newStatus = campaign.status === 'ativa' ? 'pausada' : 'ativa';
     try {
       await updateCampaign(campaign.id, { status: newStatus });
@@ -112,10 +117,16 @@ export default function CampaignsPage() {
             Campanhas
           </h1>
         </div>
-        <button className="btn btn-primary" onClick={handleOpenNewCampaign}>
-          <Plus size={16} style={{ marginRight: '8px' }} />
-          Nova campanha
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+          <div style={{ background: 'var(--bg-card)', padding: '6px 12px', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-primary)', fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Target size={14} color="var(--green-primary)" />
+            Ativas: <strong style={{ color: activeCampaignsCount >= planLimit ? 'var(--color-error)' : 'var(--text-primary)' }}>{activeCampaignsCount}</strong> / {planLimit === Infinity ? '∞' : planLimit}
+          </div>
+          <button className="btn btn-primary" onClick={handleOpenNewCampaign}>
+            <Plus size={16} style={{ marginRight: '8px' }} />
+            Nova campanha
+          </button>
+        </div>
       </div>
 
       {/* Campaigns list or empty state */}

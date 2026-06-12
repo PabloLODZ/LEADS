@@ -14,8 +14,11 @@ import {
   MoreVertical,
   Plus,
   Trash2,
+  Download,
+  Lock,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext.jsx';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
 import {
   formatRelativeDate,
@@ -28,6 +31,7 @@ import LeadDetailDrawer from './LeadDetailDrawer.jsx';
 
 export default function LeadsPage() {
   const { leads, campaigns, updateLeadStatus, deleteLead, updateLead } = useApp();
+  const { user, isAdmin } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -171,9 +175,31 @@ export default function LeadsPage() {
   return (
     <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>
       {/* Top Header */}
-      <div className="page-header" style={{ marginBottom: 'var(--space-xl)' }}>
-        <h1 className="page-title" style={{ fontSize: 'var(--font-size-3xl)', fontWeight: '800', color: 'var(--text-primary)' }}>Leads</h1>
-        <p className="page-subtitle" style={{ color: 'var(--text-muted)' }}>Visualize e gerencie todos os seus leads em um só lugar</p>
+      <div className="page-header" style={{ marginBottom: 'var(--space-xl)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-md)' }}>
+        <div>
+          <h1 className="page-title" style={{ fontSize: 'var(--font-size-3xl)', fontWeight: '800', color: 'var(--text-primary)' }}>Leads</h1>
+          <p className="page-subtitle" style={{ color: 'var(--text-muted)' }}>Visualize e gerencie todos os seus leads em um só lugar</p>
+        </div>
+        <div>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => {
+              if (!isAdmin && (user?.planId === 'starter' || user?.planId === 'growth')) {
+                toast.error('Recurso Premium', 'A exportação de leads para CSV é exclusiva dos planos Pro e Agency.');
+                navigate('/configuracoes');
+                return;
+              }
+              toast.success('Exportando', 'O download do CSV iniciará em instantes.');
+            }}
+          >
+            {(!isAdmin && (user?.planId === 'starter' || user?.planId === 'growth')) ? (
+              <Lock size={16} style={{ marginRight: '8px', color: 'var(--color-warning)' }} />
+            ) : (
+              <Download size={16} style={{ marginRight: '8px' }} />
+            )}
+            Exportar CSV
+          </button>
+        </div>
       </div>
 
       {leads.length === 0 ? (

@@ -70,11 +70,29 @@ export default function SubscriptionGuard({ children }) {
                   Inclui {p.includedCredits} leads. Excedente R$ {p.extraLeadPrice.toFixed(2)}/lead
                 </div>
                 <ul style={{ listStyle: 'none', padding: '0', margin: 'var(--space-md) 0', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                  {p.features.map((f, i) => (
-                    <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ color: 'var(--green-primary)' }}>✓</span> {f}
-                    </li>
-                  ))}
+                  {p.features.map((f, i) => {
+                    const isLocked = f.toLowerCase().includes('bloqueado');
+                    const isPartial = f.toLowerCase().includes('parcial');
+                    const isFeatured = f.toLowerCase().includes('ilimitadas') || f.toLowerCase().includes('vip') || f.toLowerCase().includes('tudo liberado') || f.toLowerCase().includes('completos');
+                    
+                    return (
+                      <li key={i} style={{ 
+                        display: 'flex', alignItems: 'center', gap: '8px', 
+                        opacity: isLocked ? 0.5 : 1,
+                        color: isFeatured ? 'var(--text-primary)' : 'inherit',
+                        fontWeight: isFeatured ? '600' : 'normal',
+                      }}>
+                        {isLocked ? (
+                          <span style={{ color: 'var(--text-muted)' }}>✕</span>
+                        ) : isPartial ? (
+                          <span style={{ color: 'var(--color-warning)' }}>~</span>
+                        ) : (
+                          <span style={{ color: 'var(--green-primary)' }}>✓</span>
+                        )}
+                        {f}
+                      </li>
+                    );
+                  })}
                 </ul>
                 <button
                   className={`btn btn-block ${p.popular ? 'btn-primary' : 'btn-secondary'}`}

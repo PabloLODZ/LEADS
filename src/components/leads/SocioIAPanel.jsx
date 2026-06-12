@@ -39,6 +39,7 @@ export default function SocioIAPanel({ lead, campaign }) {
 
   const selectedTypeDef = MESSAGE_TYPES.find(t => t.id === selectedType);
   const isStarter = user?.planId === 'starter' && !isAdmin;
+  const isCustomLocked = (user?.planId === 'starter' || user?.planId === 'growth') && !isAdmin;
 
   const handleTypeSelect = (type) => {
     if (type.premium && isStarter) {
@@ -217,19 +218,19 @@ export default function SocioIAPanel({ lead, campaign }) {
       <div style={{ marginBottom: 'var(--space-md)' }}>
         <button
           onClick={() => {
-            if (isStarter) {
-              toast.error('Recurso Premium', 'Instruções personalizadas são exclusivas dos planos avançados.');
+            if (isCustomLocked) {
+              toast.error('Recurso Pro', 'Instruções personalizadas são exclusivas do plano Pro ou superior.');
               return;
             }
             setShowCustom(!showCustom);
           }}
-          style={{ background: 'none', border: 'none', color: isStarter ? 'var(--text-muted)' : 'var(--text-muted)', fontSize: '12px', cursor: isStarter ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px', opacity: isStarter ? 0.6 : 1 }}
+          style={{ background: 'none', border: 'none', color: isCustomLocked ? 'var(--text-muted)' : 'var(--text-muted)', fontSize: '12px', cursor: isCustomLocked ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px', opacity: isCustomLocked ? 0.6 : 1 }}
         >
           <MessageSquare size={12} />
           {showCustom ? 'Ocultar instrução personalizada' : 'Adicionar instrução personalizada'}
-          {isStarter && <span style={{ fontSize: '10px', background: 'var(--bg-app)', padding: '2px 4px', borderRadius: '4px', color: 'var(--text-muted)', marginLeft: '4px' }}>PRO</span>}
+          {isCustomLocked && <span style={{ fontSize: '10px', background: 'var(--bg-app)', padding: '2px 4px', borderRadius: '4px', color: 'var(--text-muted)', marginLeft: '4px' }}>PRO</span>}
         </button>
-        {showCustom && !isStarter && (
+        {showCustom && !isCustomLocked && (
           <textarea
             className="form-input"
             style={{ marginTop: '8px', fontSize: '13px', minHeight: '60px', resize: 'none' }}
