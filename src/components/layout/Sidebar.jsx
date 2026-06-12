@@ -16,7 +16,8 @@ import {
   LogOut,
   CreditCard,
   Sun,
-  Moon
+  Moon,
+  BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useApp } from '../../contexts/AppContext.jsx';
@@ -41,6 +42,7 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
     { to: '/conversas', icon: MessageCircle, label: 'Conversas' },
     { to: '/campanhas', icon: Target, label: 'Campanhas' },
     { to: '/leads', icon: Users, label: 'Leads' },
+    { to: '/relatorios', icon: BarChart3, label: 'Relatórios' },
   ];
 
   const bottomItems = [

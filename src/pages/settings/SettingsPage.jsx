@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { Zap, CreditCard, Shield, Settings, Bell, Star } from 'lucide-react';
+import { Zap, CreditCard, Shield, Settings, Bell, Star, TrendingDown, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useApp } from '../../contexts/AppContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
 import { getTotalCredits } from '../../utils/creditEngine.js';
 import { getPlanById } from '../../data/plans.js';
+import { formatDate, formatDateTime } from '../../utils/formatters.js';
 import BuyCreditsModal from './BuyCreditsModal.jsx';
 
 export default function SettingsPage() {
   const { user, isAdmin, updateUser } = useAuth();
-  const { plans } = useApp();
-  const { upgradePlan } = useApp();
+  const { plans, creditTransactions, upgradePlan } = useApp();
   const toast = useToast();
   const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
   const [upgradingPlan, setUpgradingPlan] = useState(null);
@@ -186,23 +186,65 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Clube LODZ Section */}
-        <div className="card" style={{ border: '1px solid var(--green-primary)', background: 'var(--bg-card-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-lg)' }}>
-          <div>
-            <span className="badge badge-green" style={{ marginBottom: 'var(--space-sm)' }}>CLUBE LODZ</span>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: '800', color: 'var(--text-primary)' }}>
-              Créditos Extras com Preço de Atacado
-            </h3>
-            <p className="text-sm text-muted" style={{ marginTop: '4px', maxWidth: '600px' }}>
-              Seus créditos do plano mensal acabaram? Compre pacotes avulsos de leads baseados na hierarquia da sua assinatura comercial. 
-              <strong> Os créditos comprados não expiram.</strong>
-            </p>
+        {/* Credit Statement */}
+        {!isAdmin && (
+          <div className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
+              <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: '700', color: 'var(--text-primary)' }}>Extrato de Créditos</h3>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Saldo atual: <strong style={{ color: 'var(--text-primary)' }}>{totalCredits} créditos</strong></span>
+            </div>
+
+            {totalCredits < 10 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'var(--color-error-bg)', border: '1px solid var(--color-error)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-md)' }}>
+                <AlertCircle size={15} color="var(--color-error)" />
+                <span style={{ fontSize: '13px', color: 'var(--color-error)', fontWeight: '600' }}>
+                  Seu saldo está baixo! Você tem apenas {totalCredits} crédito{totalCredits !== 1 ? 's' : ''} restante{totalCredits !== 1 ? 's' : ''}.
+                </span>
+                <button className="btn btn-primary btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setBuyCreditsOpen(true)}>
+                  Comprar agora
+                </button>
+              </div>
+            )}
+
+            {creditTransactions.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Nenhuma movimentação de créditos ainda.</p>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-primary)' }}>
+                      <th style={{ padding: '8px 12px', fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Data</th>
+                      <th style={{ padding: '8px 12px', fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Descrição</th>
+                      <th style={{ padding: '8px 12px', fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Ajuste</th>
+                      <th style={{ padding: '8px 12px', fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Saldo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {creditTransactions.slice(0, 20).map(t => (
+                      <tr key={t.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '8px 12px', fontSize: '12px', color: 'var(--text-muted)' }}>{formatDate(t.createdAt)}</td>
+                        <td style={{ padding: '8px 12px', fontSize: '13px', color: 'var(--text-secondary)', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {t.reason || t.description || t.type}
+                        </td>
+                        <td style={{ padding: '8px 12px', fontWeight: '700', color: t.amount > 0 ? 'var(--color-success)' : t.amount < 0 ? 'var(--color-error)' : 'var(--text-muted)' }}>
+                          {t.amount > 0 ? `+${t.amount}` : t.amount === 0 ? '—' : t.amount}
+                        </td>
+                        <td style={{ padding: '8px 12px', fontSize: '13px', color: 'var(--text-primary)', fontWeight: '600' }}>
+                          {t.balanceAfter}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {creditTransactions.length > 20 && (
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '12px' }}>
+                    Mostrando as 20 movimentações mais recentes.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-          <button className="btn btn-primary" onClick={() => setBuyCreditsOpen(true)}>
-            <Star size={16} style={{ marginRight: '8px' }} />
-            Comprar leads extras
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Buy Credits Modal */}

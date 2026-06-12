@@ -20,6 +20,7 @@ import ConversationsPage from './pages/conversations/ConversationsPage.jsx';
 import SettingsPage from './pages/settings/SettingsPage.jsx';
 import SupportPage from './pages/support/SupportPage.jsx';
 import AdminPage from './pages/admin/AdminPage.jsx';
+import ReportsPage from './pages/reports/ReportsPage.jsx';
 
 // Route guards
 function PrivateRoute({ children }) {
@@ -72,6 +73,7 @@ function AppRoutes() {
         <Route path="campanhas" element={<CampaignsPage />} />
         <Route path="leads" element={<LeadsPage />} />
         <Route path="conversas" element={<ConversationsPage />} />
+        <Route path="relatorios" element={<ReportsPage />} />
         <Route path="configuracoes" element={<SettingsPage />} />
         <Route path="suporte" element={<SupportPage />} />
         <Route path="admin" element={<AdminRoute><AdminPage /></AdminRoute>} />

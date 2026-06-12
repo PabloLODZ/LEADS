@@ -8,10 +8,12 @@ import {
 import { useApp } from '../../contexts/AppContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
 import { formatRelativeDate, formatDateTime, getStatusColor, getStatusLabel, truncate, LEAD_STATUSES, LOSS_REASONS } from '../../utils/formatters.js';
+import SocioIAPanel from '../../components/leads/SocioIAPanel.jsx';
 
 export default function LeadDetailDrawer({ lead, isOpen, onClose }) {
-  const { updateLead, updateLeadStatus, interactions, addInteraction } = useApp();
+  const { updateLead, updateLeadStatus, interactions, addInteraction, campaigns } = useApp();
   const toast = useToast();
+  const leadCampaign = campaigns?.find(c => c.id === lead?.campaignId) || null;
   const [notes, setNotes] = useState('');
   const [showVariations, setShowVariations] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
@@ -363,6 +365,11 @@ export default function LeadDetailDrawer({ lead, isOpen, onClose }) {
             ) : (
               <p className="text-sm text-muted">Nenhuma mensagem personalizada disponível para este lead.</p>
             )}
+          </div>
+
+          {/* SÓCIO IA PANEL */}
+          <div className="drawer-section">
+            <SocioIAPanel lead={lead} campaign={leadCampaign} />
           </div>
 
           {/* OBSERVAÇÕES */}

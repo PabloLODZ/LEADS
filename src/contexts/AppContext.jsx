@@ -129,6 +129,7 @@ export function AppProvider({ children }) {
   const [creditTransactions, setCreditTransactions] = useState([]);
   const [interactions, setInteractions] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [adminLogs, setAdminLogs] = useState([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   // ---- FETCH ALL DATA ON LOGIN ----
@@ -193,19 +194,32 @@ export function AppProvider({ children }) {
           paymentId: row.payment_id, createdAt: row.created_at,
         })));
 
-        // Admin: fetch all users
+        // Admin: fetch all users and admin logs
         if (isAdmin) {
-          const { data: usersData } = await supabase.from('profiles').select('*');
-          if (usersData) {
-            setAllUsers(usersData.map(p => ({
+          const [usersRes, adminLogsRes] = await Promise.all([
+            supabase.from('profiles').select('*'),
+            supabase.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(200),
+          ]);
+          if (usersRes.data) {
+            setAllUsers(usersRes.data.map(p => ({
               id: p.id, name: p.name, email: '', // Email from auth, not in profiles
               avatarUrl: p.avatar_url, role: p.role, planId: p.plan_id,
               subscriptionStatus: p.subscription_status,
               stripeCustomerId: p.stripe_customer_id,
               whatsappPhone: p.whatsapp_phone || '',
               onboardingCompleted: p.onboarding_completed,
+              isBlocked: p.is_blocked || false,
+              blockedReason: p.blocked_reason || '',
+              lastSeenAt: p.last_seen_at,
               creditWallet: { baseCredits: p.base_credits, purchasedCredits: p.purchased_credits },
               createdAt: p.created_at, updatedAt: p.updated_at,
+            })));
+          }
+          if (adminLogsRes.data) {
+            setAdminLogs(adminLogsRes.data.map(l => ({
+              id: l.id, adminId: l.admin_id, targetUserId: l.target_user_id,
+              action: l.action, previousValue: l.previous_value, newValue: l.new_value,
+              note: l.note, createdAt: l.created_at,
             })));
           }
         }
@@ -603,7 +617,7 @@ export function AppProvider({ children }) {
     }
   }, [user, updateUser]);
 
-  const adminAddCredits = useCallback(async (userId, amount) => {
+  const adminAddCredits = useCallback(async (userId, amount, note = '') => {
     // Fetch current credits
     const { data: profile } = await supabase
       .from('profiles')
@@ -613,7 +627,7 @@ export function AppProvider({ children }) {
 
     if (!profile) return;
 
-    const newPurchased = (profile.purchased_credits || 0) + amount;
+    const newPurchased = Math.max(0, (profile.purchased_credits || 0) + amount);
     const balanceBefore = (profile.base_credits || 0) + (profile.purchased_credits || 0);
     const balanceAfter = (profile.base_credits || 0) + newPurchased;
 
@@ -628,11 +642,12 @@ export function AppProvider({ children }) {
       .from('credit_transactions')
       .insert({
         user_id: userId,
-        type: 'manual_admin_add',
+        type: amount > 0 ? 'manual_admin_add' : 'manual_admin_remove',
         amount,
         balance_before: balanceBefore,
         balance_after: balanceAfter,
-        reason: `Ajuste manual pelo admin (+${amount})`,
+        reason: `Ajuste manual pelo admin (${amount > 0 ? '+' : ''}${amount})${note ? ': ' + note : ''}`,
+        description: note || '',
         created_by_admin_id: user?.id,
       })
       .select()
@@ -647,6 +662,29 @@ export function AppProvider({ children }) {
       }, ...prev]);
     }
 
+    // Log the admin action
+    const targetUser = allUsers.find(u => u.id === userId);
+    const { data: logEntry } = await supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: user?.id,
+        target_user_id: userId,
+        action: amount > 0 ? 'add_credits' : 'remove_credits',
+        previous_value: { credits: balanceBefore },
+        new_value: { credits: balanceAfter },
+        note: note || `Ajuste de ${Math.abs(amount)} crédito(s)`,
+      })
+      .select()
+      .single();
+
+    if (logEntry) {
+      setAdminLogs(prev => [{
+        id: logEntry.id, adminId: logEntry.admin_id, targetUserId: logEntry.target_user_id,
+        action: logEntry.action, previousValue: logEntry.previous_value, newValue: logEntry.new_value,
+        note: logEntry.note, createdAt: logEntry.created_at,
+      }, ...prev]);
+    }
+
     // Update local state
     setAllUsers(prev => prev.map(u => {
       if (u.id !== userId) return u;
@@ -658,7 +696,89 @@ export function AppProvider({ children }) {
         },
       };
     }));
-  }, [user]);
+  }, [user, allUsers]);
+
+  const adminBlockUser = useCallback(async (userId, block, reason = '') => {
+    const targetUser = allUsers.find(u => u.id === userId);
+    const balanceBefore = { isBlocked: targetUser?.isBlocked || false };
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_blocked: block, blocked_reason: reason, updated_at: new Date().toISOString() })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Erro ao bloquear/desbloquear usuário:', error);
+      return;
+    }
+
+    // Log
+    const { data: logEntry } = await supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: user?.id,
+        target_user_id: userId,
+        action: block ? 'block_user' : 'unblock_user',
+        previous_value: balanceBefore,
+        new_value: { isBlocked: block, reason },
+        note: reason || (block ? 'Usuário bloqueado' : 'Usuário desbloqueado'),
+      })
+      .select()
+      .single();
+
+    if (logEntry) {
+      setAdminLogs(prev => [{
+        id: logEntry.id, adminId: logEntry.admin_id, targetUserId: logEntry.target_user_id,
+        action: logEntry.action, previousValue: logEntry.previous_value, newValue: logEntry.new_value,
+        note: logEntry.note, createdAt: logEntry.created_at,
+      }, ...prev]);
+    }
+
+    setAllUsers(prev => prev.map(u =>
+      u.id === userId ? { ...u, isBlocked: block, blockedReason: reason } : u
+    ));
+  }, [user, allUsers]);
+
+  const adminChangePlan = useCallback(async (userId, planId, note = '') => {
+    const targetUser = allUsers.find(u => u.id === userId);
+    const balanceBefore = { planId: targetUser?.planId };
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ plan_id: planId, updated_at: new Date().toISOString() })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Erro ao alterar plano:', error);
+      return;
+    }
+
+    // Log
+    const { data: logEntry } = await supabase
+      .from('admin_logs')
+      .insert({
+        admin_id: user?.id,
+        target_user_id: userId,
+        action: 'change_plan',
+        previous_value: balanceBefore,
+        new_value: { planId },
+        note: note || `Plano alterado para ${planId}`,
+      })
+      .select()
+      .single();
+
+    if (logEntry) {
+      setAdminLogs(prev => [{
+        id: logEntry.id, adminId: logEntry.admin_id, targetUserId: logEntry.target_user_id,
+        action: logEntry.action, previousValue: logEntry.previous_value, newValue: logEntry.new_value,
+        note: logEntry.note, createdAt: logEntry.created_at,
+      }, ...prev]);
+    }
+
+    setAllUsers(prev => prev.map(u =>
+      u.id === userId ? { ...u, planId } : u
+    ));
+  }, [user, allUsers]);
 
   // Filter data for current user (RLS handles this on the server, but we keep it for safety)
   const userLeads = leads;
@@ -677,7 +797,7 @@ export function AppProvider({ children }) {
       payments,
       creditTransactions,
       interactions,
-      adminLogs: [],
+      adminLogs,
       allUsers,
       plans: PLANS,
       isDataLoading,
@@ -706,6 +826,8 @@ export function AppProvider({ children }) {
       // Admin
       adminUpdateUser,
       adminAddCredits,
+      adminBlockUser,
+      adminChangePlan,
     }}>
       {children}
     </AppContext.Provider>
