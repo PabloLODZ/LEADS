@@ -63,7 +63,8 @@ export default async function handler(req, res) {
     }
 
     const supabase = createSupabaseAdmin();
-    const appUrl = process.env.VITE_APP_URL || req.headers.origin;
+    // APP_URL sem prefixo VITE_ — funções serverless Node.js não têm acesso a vars do Vite
+    const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || req.headers.origin;
     const successUrl = `${appUrl}/configuracoes?payment=success`;
     const cancelUrl = `${appUrl}/configuracoes?payment=cancelled`;
 

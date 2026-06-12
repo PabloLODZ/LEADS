@@ -107,10 +107,15 @@ export default function LeadsPage() {
   // Filter and Sort Logic
   const filteredLeads = leads
     .filter((lead) => {
-      const matchesSearch =
-        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (lead.username && lead.username.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (lead.bio && lead.bio.toLowerCase().includes(searchQuery.toLowerCase()));
+      const q = searchQuery.toLowerCase();
+      const campaignName = getCampaignName(lead.campaignId).toLowerCase();
+      const matchesSearch = !q ||
+        lead.name.toLowerCase().includes(q) ||
+        (lead.username && lead.username.toLowerCase().includes(q)) ||
+        (lead.phone && lead.phone.toLowerCase().includes(q)) ||
+        (lead.city && lead.city.toLowerCase().includes(q)) ||
+        (lead.bio && lead.bio.toLowerCase().includes(q)) ||
+        campaignName.includes(q);
 
       const matchesStatus =
         selectedStatusFilter === 'todos' || lead.status === selectedStatusFilter;
@@ -142,7 +147,10 @@ export default function LeadsPage() {
     contactado: leads.filter((l) => l.status === 'contactado').length,
     follow_up: leads.filter((l) => l.status === 'follow_up').length,
     respondeu: leads.filter((l) => l.status === 'respondeu').length,
+    qualificado: leads.filter((l) => l.status === 'qualificado').length,
+    negociacao: leads.filter((l) => l.status === 'negociacao').length,
     fechado: leads.filter((l) => l.status === 'fechado').length,
+    perdido: leads.filter((l) => l.status === 'perdido').length,
   };
 
   const statusList = [
@@ -151,10 +159,13 @@ export default function LeadsPage() {
     { value: 'contactado', label: 'Contactado' },
     { value: 'follow_up', label: 'Follow-up' },
     { value: 'respondeu', label: 'Respondeu' },
+    { value: 'qualificado', label: 'Qualificado' },
+    { value: 'negociacao', label: 'Negociação' },
     { value: 'fechado', label: 'Fechado' },
+    { value: 'perdido', label: 'Perdido' },
   ];
 
-  const kanbanColumns = ['novo', 'contactado', 'follow_up', 'respondeu', 'fechado'];
+  const kanbanColumns = ['novo', 'contactado', 'follow_up', 'respondeu', 'qualificado', 'negociacao', 'fechado'];
 
   return (
     <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>
@@ -212,7 +223,7 @@ export default function LeadsPage() {
                   type="text"
                   className="form-input"
                   style={{ paddingLeft: '36px', width: '100%' }}
-                  placeholder="Buscar por nome, @ ou bio..."
+                  placeholder="Buscar por nome, @, telefone, cidade ou campanha..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -332,7 +343,9 @@ export default function LeadsPage() {
                   {filteredLeads.length === 0 && (
                     <tr>
                       <td colSpan={6} style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
-                        Nenhum lead encontrado com os filtros selecionados.
+                        {searchQuery || selectedStatusFilter !== 'todos' || selectedCampaignFilter !== 'todos'
+                          ? `Nenhum lead encontrado com os filtros aplicados. Tente limpar os filtros.`
+                          : 'Nenhum lead ainda.'}
                       </td>
                     </tr>
                   )}

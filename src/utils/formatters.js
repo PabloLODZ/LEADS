@@ -83,6 +83,8 @@ export function getStatusColor(status) {
     'contactado': 'yellow',
     'follow_up': 'yellow',
     'respondeu': 'green',
+    'qualificado': 'green',
+    'negociacao': 'purple',
     'fechado': 'green',
     'perdido': 'red',
     'descartado': 'gray',
@@ -109,6 +111,8 @@ export function getStatusLabel(status) {
     'contactado': 'Contactado',
     'follow_up': 'Follow-up',
     'respondeu': 'Respondeu',
+    'qualificado': 'Qualificado',
+    'negociacao': 'Em Negociação',
     'fechado': 'Fechado',
     'perdido': 'Perdido',
     'descartado': 'Descartado',
@@ -119,3 +123,26 @@ export function getStatusLabel(status) {
   };
   return map[status] || status;
 }
+
+// All lead statuses in funnel order
+export const LEAD_STATUSES = [
+  { value: 'novo', label: 'Novo', color: 'blue' },
+  { value: 'contactado', label: 'Contactado', color: 'yellow' },
+  { value: 'follow_up', label: 'Follow-up', color: 'yellow' },
+  { value: 'respondeu', label: 'Respondeu', color: 'green' },
+  { value: 'qualificado', label: 'Qualificado', color: 'green' },
+  { value: 'negociacao', label: 'Em Negociação', color: 'purple' },
+  { value: 'fechado', label: 'Fechado', color: 'green' },
+  { value: 'perdido', label: 'Perdido', color: 'red' },
+];
+
+// Loss reason options
+export const LOSS_REASONS = [
+  'Preço alto',
+  'Sem interesse no momento',
+  'Não respondeu mais',
+  'Escolheu concorrente',
+  'Sem budget',
+  'Negócio encerrado',
+  'Outro',
+];

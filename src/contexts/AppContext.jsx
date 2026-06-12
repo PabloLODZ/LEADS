@@ -28,6 +28,7 @@ function mapLeadFromDB(row) {
     segment: row.segment || '',
     bio: row.bio || '',
     notes: row.notes || '',
+    lossReason: row.loss_reason || '',
     googlePlaceId: row.google_place_id,
     googleRating: row.google_rating,
     googleReviewsCount: row.google_reviews_count,
@@ -98,6 +99,7 @@ function mapLeadToDB(data) {
     website: 'website', city: 'city', state: 'state',
     source: 'source', score: 'score', status: 'status',
     segment: 'segment', bio: 'bio', notes: 'notes',
+    lossReason: 'loss_reason',
     personalizedMessage: 'personalized_message',
     messageDirect: 'message_direct', messageConsultative: 'message_consultative',
     messageLight: 'message_light', personalizationReason: 'personalization_reason',
@@ -387,11 +389,40 @@ export function AppProvider({ children }) {
     setLeads(prev => prev.filter(l => l.id !== id));
   }, []);
 
-  const updateLeadStatus = useCallback(async (id, status) => {
-    await updateLead(id, { status, lastInteractionAt: new Date().toISOString() });
+  const updateLeadStatus = useCallback(async (id, status, lossReason = '') => {
+    const lead = leads.find(l => l.id === id);
+    const previousStatus = lead?.status || 'novo';
+
+    const updates = { status, lastInteractionAt: new Date().toISOString() };
+    if (lossReason) updates.lossReason = lossReason;
+
+    await updateLead(id, updates);
+
+    // Auto-register status change event in interactions
+    if (lead) {
+      const { getStatusLabel } = await import('../utils/formatters.js');
+      const msg = `Status alterado: ${getStatusLabel(previousStatus)} → ${getStatusLabel(status)}${lossReason ? ` (Motivo: ${lossReason})` : ''}`;
+      const dbData = {
+        user_id: user?.id,
+        lead_id: id,
+        type: 'status_change',
+        event_type: 'status_changed',
+        message: msg,
+        direction: 'system',
+        metadata: { previousStatus, newStatus: status, lossReason: lossReason || null },
+      };
+      const { data: iData } = await supabase.from('interactions').insert(dbData).select().single();
+      if (iData) {
+        setInteractions(prev => [{
+          id: iData.id, userId: iData.user_id, leadId: iData.lead_id,
+          type: iData.type, eventType: iData.event_type,
+          message: iData.message, direction: iData.direction,
+          metadata: iData.metadata, createdAt: iData.created_at,
+        }, ...prev]);
+      }
+    }
 
     // Update campaign counters
-    const lead = leads.find(l => l.id === id);
     if (lead) {
       const campaign = campaigns.find(c => c.id === lead.campaignId);
       if (campaign) {
@@ -401,10 +432,10 @@ export function AppProvider({ children }) {
 
         const counters = {
           contactedLeads: campaignLeads.filter(l =>
-            ['contactado', 'follow_up', 'respondeu', 'fechado', 'perdido'].includes(l.status)
+            ['contactado', 'follow_up', 'respondeu', 'qualificado', 'negociacao', 'fechado', 'perdido'].includes(l.status)
           ).length,
           respondedLeads: campaignLeads.filter(l =>
-            ['respondeu', 'fechado'].includes(l.status)
+            ['respondeu', 'qualificado', 'negociacao', 'fechado'].includes(l.status)
           ).length,
           closedLeads: campaignLeads.filter(l => l.status === 'fechado').length,
         };
@@ -412,16 +443,18 @@ export function AppProvider({ children }) {
         await updateCampaign(campaign.id, counters);
       }
     }
-  }, [leads, campaigns, updateLead, updateCampaign]);
+  }, [leads, campaigns, user, updateLead, updateCampaign]);
 
   // ---- INTERACTIONS ----
-  const addInteraction = useCallback(async (leadId, type, message, direction = 'out') => {
+  const addInteraction = useCallback(async (leadId, type, message, direction = 'out', eventType = 'manual', metadata = {}) => {
     const dbData = {
       user_id: user?.id,
       lead_id: leadId,
       type,
+      event_type: eventType,
       message,
       direction,
+      metadata,
     };
 
     const { data, error } = await supabase
@@ -440,8 +473,10 @@ export function AppProvider({ children }) {
       userId: data.user_id,
       leadId: data.lead_id,
       type: data.type,
+      eventType: data.event_type,
       message: data.message,
       direction: data.direction,
+      metadata: data.metadata || {},
       createdAt: data.created_at,
     };
 
