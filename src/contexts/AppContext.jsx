@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient.js';
 import { PLANS } from '../data/plans.js';
 import { consumeCredits, addCredits, getTotalCredits } from '../utils/creditEngine.js';
 import { generatePersonalizedLeadMessage } from '../utils/messageGenerator.js';
+import { getStatusLabel } from '../utils/formatters.js';
 import { useAuth } from './AuthContext.jsx';
 import { useToast } from './ToastContext.jsx';
 
@@ -400,7 +401,6 @@ export function AppProvider({ children }) {
 
     // Auto-register status change event in interactions
     if (lead) {
-      const { getStatusLabel } = await import('../utils/formatters.js');
       const msg = `Status alterado: ${getStatusLabel(previousStatus)} → ${getStatusLabel(status)}${lossReason ? ` (Motivo: ${lossReason})` : ''}`;
       const dbData = {
         user_id: user?.id,

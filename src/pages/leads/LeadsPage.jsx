@@ -104,6 +104,12 @@ export default function LeadsPage() {
     }
   };
 
+  // getCampaignName must be defined BEFORE filteredLeads (no hoisting for const)
+  const getCampaignName = (campaignId) => {
+    const campaign = campaigns.find((c) => c.id === campaignId);
+    return campaign ? campaign.name : '—';
+  };
+
   // Filter and Sort Logic
   const filteredLeads = leads
     .filter((lead) => {
@@ -133,11 +139,6 @@ export default function LeadsPage() {
       if (sortBy === 'interaction') return new Date(b.updatedAt) - new Date(a.updatedAt);
       return 0;
     });
-
-  const getCampaignName = (campaignId) => {
-    const campaign = campaigns.find((c) => c.id === campaignId);
-    return campaign ? campaign.name : '—';
-  };
 
   // Status stats calculations
   const totalCount = leads.length;
