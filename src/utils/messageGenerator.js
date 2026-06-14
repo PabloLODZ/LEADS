@@ -264,8 +264,9 @@ export async function generateChatResponse(lead, userMessage, chatHistory = []) 
 
   } catch (error) {
     console.error("Erro no Gemini AI:", error);
+    const errorMsg = error?.message || "Erro desconhecido";
     return {
-      content: "Desculpe, ocorreu um erro ao conectar com o servidor da IA. Verifique sua chave de API ou tente novamente."
+      content: `❌ **Falha na conexão com a IA**\n\nOcorreu um erro ao conectar com o Google Gemini. Motivo técnico: \`${errorMsg}\`\n\n*Se o erro for sobre cota (Quota exceeded) com limite 0, verifique se a região da sua conta permite a camada gratuita ou crie um novo projeto no AI Studio.*`
     };
   }
 }
