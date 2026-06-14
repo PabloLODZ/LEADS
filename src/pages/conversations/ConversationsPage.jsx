@@ -11,7 +11,10 @@ import {
   ArrowRight,
   Sparkles,
   HelpCircle,
+  Lock,
+  Mic
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useApp } from '../../contexts/AppContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
 import { getInitials, getStatusColor, getStatusLabel } from '../../utils/formatters.js';
@@ -19,6 +22,7 @@ import { generateChatResponse } from '../../utils/messageGenerator.js';
 
 export default function ConversationsPage() {
   const { leads, campaigns, addInteraction, updateLeadStatus } = useApp();
+  const { user, isAdmin } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -37,6 +41,66 @@ export default function ConversationsPage() {
   });
 
   const respondeuCount = leads.filter((l) => l.status === 'respondeu').length;
+
+  const planHierarchy = ['starter', 'growth', 'pro', 'agency'];
+  
+  const hasAccess = (requiredPlan) => {
+    if (isAdmin) return true;
+    const userIndex = planHierarchy.indexOf(user?.planId || 'starter');
+    const requiredIndex = planHierarchy.indexOf(requiredPlan);
+    return userIndex >= requiredIndex;
+  };
+
+  const aiTools = [
+    {
+      id: 'analysis',
+      title: 'Análise Psicológica',
+      icon: <User size={16} />,
+      plan: 'growth',
+      prompt: 'Faça uma análise psicológica detalhada deste lead com base no segmento e bio. Me diga qual o perfil dele, principais dores ocultas e quais gatilhos mentais devo usar para fechar a venda.',
+      desc: 'Raio-x completo do perfil do lead'
+    },
+    {
+      id: 'audio',
+      title: 'Script de Áudio',
+      icon: <Mic size={16} />,
+      plan: 'pro',
+      prompt: 'Crie um roteiro persuasivo para eu gravar um áudio curto de WhatsApp para este lead. Inclua marcações de pausas e entonação. Foque em gerar curiosidade e conversão imediata.',
+      desc: 'Roteiro persuasivo para gravação'
+    },
+    {
+      id: 'objection',
+      title: 'Extrator de Objeções',
+      icon: <Zap size={16} />,
+      plan: 'agency',
+      prompt: 'Analise a nossa conversa acima e me diga qual é a verdadeira objeção oculta que o lead não falou abertamente. Em seguida, me dê a resposta exata (em aspas) que devo enviar para quebrar essa objeção.',
+      desc: 'Descubra a objeção invisível'
+    }
+  ];
+
+  const handleToolClick = async (tool) => {
+    if (!hasAccess(tool.plan)) {
+      toast.error('Plano incompatível', \`A ferramenta "\${tool.title}" é exclusiva do plano \${tool.plan.toUpperCase()}. Faça o upgrade!\`);
+      return;
+    }
+    
+    // Simulate sending a hidden user message that asks for the tool output
+    const userMsg = \`[SÓCIO AI TOOL: \${tool.title}] \${tool.prompt}\`;
+    
+    // We add the tool request to the history so AI knows context, but we can optionally format it nicely
+    const newHistory = [...chatHistory, { role: 'user', content: userMsg }];
+    setChatHistory(newHistory);
+    setGenerating(true);
+
+    const response = await generateChatResponse(selectedLead, userMsg, newHistory);
+
+    setChatHistory([...newHistory, {
+      role: 'ai',
+      content: response.content,
+    }]);
+    
+    setGenerating(false);
+  };
 
   const handleSelectLead = (lead) => {
     setSelectedLead(lead);
@@ -362,6 +426,128 @@ export default function ConversationsPage() {
           </div>
         )}
       </div>
+
+      {/* RIGHT SIDEBAR: AI Tools */}
+      {selectedLead && (
+        <div style={{ 
+          width: '280px', 
+          borderLeft: '1px solid var(--border-primary)', 
+          background: 'var(--bg-sidebar)',
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: 10
+        }}>
+          <div style={{ padding: '20px 16px', borderBottom: '1px solid var(--border-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Sparkles size={18} style={{ color: 'var(--color-warning)' }} />
+            <span style={{ fontWeight: '600', fontSize: '15px', color: 'var(--text-primary)' }}>Ferramentas Avançadas</span>
+          </div>
+          
+          <div style={{ padding: '16px', flex: 1, overflowY: 'auto' }} className="hide-scrollbar">
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.5' }}>
+              Utilize o poder da inteligência artificial para otimizar suas vendas com este lead.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {aiTools.map(tool => {
+                const unlocked = hasAccess(tool.plan);
+                return (
+                  <div 
+                    key={tool.id}
+                    onClick={() => handleToolClick(tool)}
+                    style={{
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border-primary)',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      opacity: unlocked ? 1 : 0.7,
+                      transition: 'all 0.2s',
+                      boxShadow: 'var(--shadow-sm)',
+                      ...(!unlocked ? { filter: 'grayscale(0.5)' } : {})
+                    }}
+                    onMouseEnter={(e) => {
+                      if (unlocked) {
+                        e.currentTarget.style.borderColor = 'var(--green-primary)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (unlocked) {
+                        e.currentTarget.style.borderColor = 'var(--border-primary)';
+                        e.currentTarget.style.transform = 'none';
+                        e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                      }
+                    }}
+                  >
+                    {!unlocked && (
+                      <div style={{ position: 'absolute', top: '8px', right: '8px', color: 'var(--text-muted)' }}>
+                        <Lock size={14} />
+                      </div>
+                    )}
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', color: unlocked ? 'var(--green-primary)' : 'var(--text-muted)' }}>
+                      {tool.icon}
+                      <span style={{ fontWeight: '600', fontSize: '13px', color: 'var(--text-primary)' }}>{tool.title}</span>
+                    </div>
+                    
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
+                      {tool.desc}
+                    </p>
+                    
+                    {!unlocked && (
+                      <div style={{ 
+                        display: 'inline-block',
+                        marginTop: '10px', 
+                        fontSize: '10px', 
+                        fontWeight: '600',
+                        padding: '2px 6px',
+                        background: 'var(--bg-hover)',
+                        color: 'var(--text-muted)',
+                        borderRadius: '4px',
+                        textTransform: 'uppercase'
+                      }}>
+                        Plano {tool.plan}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            {!isAdmin && (
+              <div style={{ 
+                marginTop: '24px', 
+                padding: '12px', 
+                borderRadius: '8px', 
+                background: 'rgba(59, 130, 246, 0.1)', 
+                border: '1px solid rgba(59, 130, 246, 0.2)' 
+              }}>
+                <div style={{ fontSize: '12px', color: 'var(--color-info)', fontWeight: '600', marginBottom: '4px' }}>
+                  Quer mais poder?
+                </div>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
+                  Faça upgrade de plano e desbloqueie ferramentas avançadas para fechar muito mais vendas.
+                </p>
+                <button 
+                  onClick={() => navigate('/configuracoes')}
+                  className="btn btn-primary btn-sm" 
+                  style={{ width: '100%', marginTop: '10px', fontSize: '11px' }}
+                >
+                  Ver Planos
+                </button>
+              </div>
+            )}
+            
+            {isAdmin && (
+              <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '10px', color: 'var(--green-primary)', fontWeight: '600' }}>
+                ✓ Admin Mode: Tools Unlocked
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
