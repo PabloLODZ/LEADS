@@ -105,7 +105,7 @@ export default function TodayPage() {
           flexShrink: 0, width: '8px', height: '8px',
           borderRadius: '50%',
           background: score === 'high' ? 'var(--green-primary)' :
-                      score === 'medium' ? '#fbbf24' : '#f87171',
+                      score === 'medium' ? 'var(--color-warning)' : 'var(--color-error)',
         }} title={`Score: ${lead.score}`} />
 
         {/* Main info */}
@@ -188,7 +188,7 @@ export default function TodayPage() {
       <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>
         <Header greeting={greeting} userName={userName} dayOfWeek={dayOfWeek} formattedDate={formattedDate} onNew={() => navigate('/campanhas')} />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--space-3xl)' }}>
-          <div style={{ color: '#1E2E21', marginBottom: '16px' }}>
+          <div style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>
             <Target size={48} />
           </div>
           <h3 style={{ fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>Nenhum lead ainda</h3>

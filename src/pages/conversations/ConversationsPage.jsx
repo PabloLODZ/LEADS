@@ -101,26 +101,26 @@ export default function ConversationsPage() {
   return (
     <div className="chat-layout" style={{ display: 'flex', height: 'calc(100vh - 0px)', overflow: 'hidden' }}>
       {/* LEFT SIDEBAR contacts */}
-      <div className="chat-sidebar" style={{ width: '320px', borderRight: '1px solid #1A2B1D', display: 'flex', flexDirection: 'column', background: '#0A0F0D' }}>
-        <div className="chat-sidebar-header" style={{ padding: '20px 16px', borderBottom: '1px solid #1A2B1D', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="chat-sidebar" style={{ width: '320px', borderRight: '1px solid var(--border-primary)', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
+        <div className="chat-sidebar-header" style={{ padding: '20px 16px', borderBottom: '1px solid var(--border-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ color: '#00C85A' }}>
+            <div style={{ color: 'var(--green-primary)' }}>
               <Bot size={24} />
             </div>
-            <span style={{ fontWeight: '600', fontSize: '16px', color: '#F0F4F1' }}>Sócio AI</span>
+            <span style={{ fontWeight: '600', fontSize: '16px', color: 'var(--text-primary)' }}>Sócio AI</span>
           </div>
           {respondeuCount > 0 && (
-            <span style={{ background: '#0D2B18', color: '#00C85A', fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '12px' }}>{respondeuCount} novos</span>
+            <span style={{ background: 'var(--green-dark)', color: 'var(--green-primary)', fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '12px' }}>{respondeuCount} novos</span>
           )}
         </div>
 
         {/* Search */}
         <div style={{ padding: '16px', position: 'relative' }}>
-          <Search size={14} style={{ position: 'absolute', left: '28px', top: '50%', transform: 'translateY(-50%)', color: '#4A5C4D' }} />
+          <Search size={14} style={{ position: 'absolute', left: '28px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             type="text"
             className="form-input"
-            style={{ paddingLeft: '36px', width: '100%', fontSize: '13px', background: '#111A14', borderColor: '#1E2E21' }}
+            style={{ paddingLeft: '36px', width: '100%', fontSize: '13px', background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
             placeholder="Buscar lead..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -143,12 +143,12 @@ export default function ConversationsPage() {
                   margin: '4px 0',
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  background: isActive ? '#0D2B18' : 'transparent',
-                  border: isActive ? '1px solid #00C85A' : '1px solid transparent',
+                  background: isActive ? 'var(--green-dark)' : 'transparent',
+                  border: isActive ? '1px solid var(--green-primary)' : '1px solid transparent',
                   transition: 'background 0.2s',
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.background = '#111A14';
+                  if (!isActive) e.currentTarget.style.background = 'var(--bg-card)';
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) e.currentTarget.style.background = 'transparent';
@@ -160,33 +160,33 @@ export default function ConversationsPage() {
                     width: '36px',
                     height: '36px',
                     borderRadius: '8px',
-                    background: '#111A14',
-                    border: '1px solid #1E2E21',
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-primary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: '600',
                     fontSize: '12px',
-                    color: '#00C85A',
+                    color: 'var(--green-primary)',
                   }}
                 >
                   {getInitials(contact.name)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: '550', fontSize: '13px', color: '#F0F4F1', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontWeight: '550', fontSize: '13px', color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     {contact.name}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#7A8C7D', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     {getCampaignName(contact.campaignId)}
                   </div>
                 </div>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: contact.status === 'respondeu' ? '#00C85A' : '#3B82F6' }}></span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: contact.status === 'respondeu' ? 'var(--green-primary)' : 'var(--color-info)' }}></span>
               </div>
             );
           })}
 
           {contacts.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '32px', color: '#7A8C7D', fontSize: '13px' }}>
+            <div style={{ textAlign: 'center', padding: '32px', color: 'var(--text-secondary)', fontSize: '13px' }}>
               Nenhum contato encontrado.
             </div>
           )}
@@ -302,13 +302,13 @@ export default function ConversationsPage() {
         ) : (
           /* Default state when no lead selected */
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: 'var(--space-3xl)', textAlign: 'center' }}>
-            <div style={{ color: '#1E2E21', marginBottom: '24px' }}>
+            <div style={{ color: 'var(--border-primary)', marginBottom: '24px' }}>
               <Bot size={48} />
             </div>
-            <h2 style={{ fontSize: '20px', fontWeight: '500', color: '#F0F4F1', marginBottom: '12px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '500', color: 'var(--text-primary)', marginBottom: '12px' }}>
               Selecione uma conversa
             </h2>
-            <p style={{ color: '#7A8C7D', maxWidth: '420px', fontSize: '14px', lineHeight: '1.5' }}>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '420px', fontSize: '14px', lineHeight: '1.5' }}>
               Escolha um lead na barra lateral para gerar respostas inteligentes com o Sócio AI baseadas no histórico da campanha.
             </p>
           </div>

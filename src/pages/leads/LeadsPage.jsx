@@ -219,11 +219,11 @@ export default function LeadsPage() {
             bottom: '-36px',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: '#111A14',
-            border: '1px solid #1E2E21',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-primary)',
             borderRadius: '6px',
             fontSize: '12px',
-            color: '#F0F4F1',
+            color: 'var(--text-primary)',
             padding: '4px 8px',
             whiteSpace: 'nowrap',
             transition: 'opacity 0.2s',
@@ -236,10 +236,10 @@ export default function LeadsPage() {
 
       {leads.length === 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-3xl)', textAlign: 'center' }}>
-          <div style={{ color: '#1E2E21', marginBottom: '16px' }}>
+          <div style={{ color: 'var(--border-primary)', marginBottom: '16px' }}>
             <Target size={48} />
           </div>
-          <h3 style={{ fontSize: '16px', color: '#4A5C4D', fontWeight: '500', marginBottom: '8px' }}>Nenhum lead ainda</h3>
+          <h3 style={{ fontSize: '16px', color: 'var(--text-muted)', fontWeight: '500', marginBottom: '8px' }}>Nenhum lead ainda</h3>
           <p style={{ color: 'var(--text-muted)', maxWidth: '400px', marginBottom: '20px' }}>
             Configure e ative uma campanha para começar a garimpar leads automaticamente com nossa IA.
           </p>
@@ -266,9 +266,9 @@ export default function LeadsPage() {
                     fontSize: '13px',
                     fontWeight: '500',
                     border: '1px solid',
-                    borderColor: isActive ? '#00C85A' : '#1E2E21',
-                    background: isActive ? '#0D2B18' : 'transparent',
-                    color: isActive ? '#00C85A' : '#7A8C7D',
+                    borderColor: isActive ? 'var(--green-primary)' : 'var(--border-primary)',
+                    background: isActive ? 'var(--green-dark)' : 'transparent',
+                    color: isActive ? 'var(--green-primary)' : 'var(--text-secondary)',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                     whiteSpace: 'nowrap'
@@ -353,54 +353,54 @@ export default function LeadsPage() {
             <div className="table-container" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: 'var(--radius-lg)', overflowX: 'auto' }}>
               <table className="table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #1E2E21' }}>
-                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A5C4D' }}>Nome</th>
-                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A5C4D' }}>Origem / Campanha</th>
-                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A5C4D' }}>Score</th>
-                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A5C4D' }}>Status</th>
-                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A5C4D' }}>Última Interação</th>
-                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4A5C4D', textAlign: 'right' }}>Ações</th>
+                  <tr style={{ borderBottom: '1px solid var(--border-primary)' }}>
+                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>Nome</th>
+                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>Origem / Campanha</th>
+                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>Score</th>
+                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>Status</th>
+                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)' }}>Última Interação</th>
+                    <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', textAlign: 'right' }}>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredLeads.map((lead) => {
                     const getStatusBadgeStyle = (status) => {
                       switch (status) {
-                        case 'novo': return { bg: '#0D1E2B', color: '#3B82F6', border: '#1A3550' };
-                        case 'contactado': return { bg: '#1E2B0D', color: '#84CC16', border: '#2E4014' };
-                        case 'follow_up': return { bg: '#2B1E0D', color: '#F5A623', border: '#4A3010' };
-                        case 'respondeu': return { bg: '#0D2B18', color: '#00C85A', border: '#1A4A28' };
-                        case 'perdido': return { bg: '#2B0D0D', color: '#E5383B', border: '#4A1414' };
-                        default: return { bg: '#111A14', color: '#7A8C7D', border: '#1E2E21' };
+                        case 'novo': return { bg: 'var(--color-info-bg)', color: 'var(--color-info)', border: 'var(--border-primary)' };
+                        case 'contactado': return { bg: 'var(--color-success-bg)', color: 'var(--color-success)', border: 'var(--border-primary)' };
+                        case 'follow_up': return { bg: '#2B1E0D', color: 'var(--color-warning)', border: 'var(--border-primary)' };
+                        case 'respondeu': return { bg: 'var(--green-dark)', color: 'var(--green-primary)', border: 'var(--border-primary)' };
+                        case 'perdido': return { bg: '#2B0D0D', color: 'var(--color-error)', border: 'var(--border-primary)' };
+                        default: return { bg: 'var(--bg-card)', color: 'var(--text-secondary)', border: 'var(--border-primary)' };
                       }
                     };
                     const badgeStyle = getStatusBadgeStyle(lead.status);
 
                     return (
-                      <tr key={lead.id} style={{ borderBottom: '1px solid #0F1810', transition: 'background 150ms ease' }} className="table-row-hover">
+                      <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background 150ms ease' }} className="table-row-hover">
                         <td style={{ padding: '14px 16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ flexShrink: 0, width: '32px', height: '32px', borderRadius: '8px', background: '#0D2B18', color: '#00C85A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '600' }}>
+                            <div style={{ flexShrink: 0, width: '32px', height: '32px', borderRadius: '8px', background: 'var(--green-dark)', color: 'var(--green-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '600' }}>
                               {lead.name.substring(0,2).toUpperCase()}
                             </div>
                             <div>
-                              <div style={{ fontSize: '14px', fontWeight: '500', color: '#F0F4F1' }}>{lead.name}</div>
-                              {lead.username && <span style={{ fontSize: '12px', color: '#7A8C7D' }}>@{lead.username}</span>}
+                              <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>{lead.name}</div>
+                              {lead.username && <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>@{lead.username}</span>}
                             </div>
                           </div>
                         </td>
                         <td style={{ padding: '14px 16px' }}>
                           {lead.campaignId ? (
-                            <span style={{ fontSize: '13px', color: '#7A8C7D' }}>{getCampaignName(lead.campaignId)}</span>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{getCampaignName(lead.campaignId)}</span>
                           ) : (
-                            <span style={{ fontSize: '11px', background: '#111A14', color: '#4A5C4D', padding: '3px 8px', borderRadius: '4px', border: '1px solid #1E2E21' }}>Sem campanha</span>
+                            <span style={{ fontSize: '11px', background: 'var(--bg-card)', color: 'var(--text-muted)', padding: '3px 8px', borderRadius: '4px', border: '1px solid var(--border-primary)' }}>Sem campanha</span>
                           )}
                         </td>
                         <td style={{ padding: '14px 16px' }}>
                           <span style={{ 
                             fontSize: '12px', fontWeight: '600', padding: '3px 8px', borderRadius: '4px',
-                            background: lead.score >= 90 ? '#0D2B18' : lead.score >= 60 ? '#2B1F0A' : '#2B0A0A',
-                            color: lead.score >= 90 ? '#00C85A' : lead.score >= 60 ? '#F5A623' : '#E5383B'
+                            background: lead.score >= 90 ? 'var(--green-dark)' : lead.score >= 60 ? 'var(--color-warning-bg)' : 'var(--color-error-bg)',
+                            color: lead.score >= 90 ? 'var(--green-primary)' : lead.score >= 60 ? 'var(--color-warning)' : 'var(--color-error)'
                           }}>
                             {lead.score || 0} pts
                           </span>
@@ -413,14 +413,14 @@ export default function LeadsPage() {
                             {getStatusLabel(lead.status)}
                           </span>
                         </td>
-                        <td style={{ padding: '14px 16px', fontSize: '13px', color: '#7A8C7D' }}>
+                        <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-secondary)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <Clock size={12} />
                             {formatRelativeDate(lead.updatedAt)}
                           </div>
                         </td>
                         <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '12px', color: '#4A5C4D' }}>
+                          <div style={{ display: 'inline-flex', gap: '12px', color: 'var(--text-muted)' }}>
                             <button className="btn btn-ghost btn-sm" style={{ padding: '4px', color: 'inherit' }} onClick={() => handleOpenDrawer(lead)} title="Ver detalhes">
                               <Eye size={16} />
                             </button>
@@ -460,13 +460,13 @@ export default function LeadsPage() {
                   const statusColor = getStatusColor(colName);
 
                   return (
-                    <div key={colName} className="kanban-column" style={{ flex: '0 0 260px', background: '#0D1410', border: '1px solid #1A2B1D', borderRadius: '10px', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 280px)', padding: '12px' }}>
-                      <div className="kanban-column-header" style={{ paddingBottom: '10px', marginBottom: '10px', borderBottom: '1px solid #1A2B1D', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={colName} className="kanban-column" style={{ flex: '0 0 260px', background: 'var(--bg-sidebar)', border: '1px solid var(--border-primary)', borderRadius: '10px', display: 'flex', flexDirection: 'column', maxHeight: 'calc(100vh - 280px)', padding: '12px' }}>
+                      <div className="kanban-column-header" style={{ paddingBottom: '10px', marginBottom: '10px', borderBottom: '1px solid var(--border-primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: `var(--color-${statusColor === 'yellow' ? 'warning' : statusColor === 'blue' ? 'info' : statusColor === 'red' ? 'error' : statusColor})` }}></span>
-                          <span style={{ fontWeight: '600', fontSize: '11px', textTransform: 'uppercase', color: '#4A5C4D' }}>{getStatusLabel(colName)}</span>
+                          <span style={{ fontWeight: '600', fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>{getStatusLabel(colName)}</span>
                         </div>
-                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#111A14', border: '1px solid #1A2B1D', color: '#4A5C4D', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{colLeads.length}</span>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--bg-card)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{colLeads.length}</span>
                       </div>
 
                       <Droppable droppableId={colName}>
@@ -487,8 +487,8 @@ export default function LeadsPage() {
                                     className={`kanban-card ${snapshot.isDragging ? 'dragging' : ''}`}
                                     style={{
                                       padding: '12px',
-                                      background: '#111A14',
-                                      border: '1px solid #1E2E21',
+                                      background: 'var(--bg-card)',
+                                      border: '1px solid var(--border-primary)',
                                       borderRadius: '8px',
                                       cursor: 'grab',
                                       transition: 'border-color 150ms ease, background 150ms ease',
@@ -496,33 +496,33 @@ export default function LeadsPage() {
                                     }}
                                     onClick={() => handleOpenDrawer(lead)}
                                     onMouseEnter={(e) => {
-                                      e.currentTarget.style.borderColor = '#2A3E2D';
-                                      e.currentTarget.style.background = '#131D15';
+                                      e.currentTarget.style.borderColor = 'var(--border-hover)';
+                                      e.currentTarget.style.background = 'var(--bg-hover)';
                                     }}
                                     onMouseLeave={(e) => {
-                                      e.currentTarget.style.borderColor = '#1E2E21';
-                                      e.currentTarget.style.background = '#111A14';
+                                      e.currentTarget.style.borderColor = 'var(--border-primary)';
+                                      e.currentTarget.style.background = 'var(--bg-card)';
                                     }}
                                   >
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-                                      <div style={{ fontWeight: '550', color: '#F0F4F1', fontSize: '13px' }}>{lead.name}</div>
+                                      <div style={{ fontWeight: '550', color: 'var(--text-primary)', fontSize: '13px' }}>{lead.name}</div>
                                     </div>
-                                    <p style={{ fontSize: '12px', color: '#4A5C4D', margin: '0 0 12px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 12px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                       {lead.city ? `${lead.city} • ` : ''}{lead.bio || lead.username || 'Sem detalhes'}
                                     </p>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: '#0D2B18', color: '#00C85A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: '600' }}>
+                                        <div style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'var(--green-dark)', color: 'var(--green-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: '600' }}>
                                           {lead.name.substring(0,2).toUpperCase()}
                                         </div>
-                                        <span style={{ fontSize: '11px', color: '#4A5C4D' }}>
+                                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                                           {truncate(getCampaignName(lead.campaignId), 15)}
                                         </span>
                                       </div>
                                       <span style={{ 
                                         fontSize: '11px', fontWeight: '600', padding: '2px 6px', borderRadius: '4px',
-                                        background: lead.score >= 90 ? '#0D2B18' : lead.score >= 60 ? '#2B1F0A' : '#2B0A0A',
-                                        color: lead.score >= 90 ? '#00C85A' : lead.score >= 60 ? '#F5A623' : '#E5383B'
+                                        background: lead.score >= 90 ? 'var(--green-dark)' : lead.score >= 60 ? 'var(--color-warning-bg)' : 'var(--color-error-bg)',
+                                        color: lead.score >= 90 ? 'var(--green-primary)' : lead.score >= 60 ? 'var(--color-warning)' : 'var(--color-error)'
                                       }}>
                                         {lead.score || 0} pts
                                       </span>

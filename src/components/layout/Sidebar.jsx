@@ -86,7 +86,7 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
             <span className="nav-label">{item.label}</span>
             {item.to === '/relatorios' && unreadCount > 0 && !collapsed && (
               <span style={{ 
-                background: '#E5383B', 
+                background: 'var(--color-error)', 
                 color: '#fff', 
                 fontSize: '11px', 
                 fontWeight: '700', 
@@ -105,7 +105,7 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
                 width: '8px',
                 height: '8px',
                 borderRadius: '50%',
-                background: '#E5383B'
+                background: 'var(--color-error)'
               }} />
             )}
           </NavLink>
@@ -143,17 +143,17 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
       {/* Footer */}
       <div className="sidebar-footer" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
         {/* Simplified Credit Card */}
-        <div style={{ padding: '12px', background: '#111A14', borderRadius: '8px', border: '1px solid #1E2E21' }}>
+        <div style={{ padding: '12px', background: 'var(--bg-card-secondary)', borderRadius: '8px', border: '1px solid var(--border-primary)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '10px', fontWeight: '600', color: '#4A5C4D', textTransform: 'uppercase' }}>CRÉDITOS</span>
-            <Zap size={14} style={{ color: '#00C85A' }} />
+            <span style={{ fontSize: '10px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>CRÉDITOS</span>
+            <Zap size={14} style={{ color: 'var(--green-primary)' }} />
           </div>
-          <div style={{ fontSize: '20px', fontWeight: '700', color: '#F0F4F1', marginBottom: '4px' }}>
-            {isAdmin ? 'Ilimitado' : totalCredits} <span style={{ fontSize: '12px', fontWeight: '400', color: '#7A8C7D' }}>restantes</span>
+          <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
+            {isAdmin ? 'Ilimitado' : totalCredits} <span style={{ fontSize: '12px', fontWeight: '400', color: 'var(--text-secondary)' }}>restantes</span>
           </div>
           {!isAdmin && (
-            <div style={{ width: '100%', height: '3px', background: '#1E2E21', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
-              <div style={{ width: `${Math.max(0, 100 - usedPercent)}%`, height: '100%', background: '#00C85A' }} />
+            <div style={{ width: '100%', height: '3px', background: 'var(--border-primary)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
+              <div style={{ width: `${Math.max(0, 100 - usedPercent)}%`, height: '100%', background: 'var(--green-primary)' }} />
             </div>
           )}
         </div>
