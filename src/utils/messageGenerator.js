@@ -1,8 +1,8 @@
 // ==================================================
 // LODZ - Gerador de Mensagens Personalizadas
 // ==================================================
-// Função que conecta com a API do Google Gemini
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// Função que conecta com a API do Groq (Llama 3)
+import Groq from "groq-sdk";
 
 const PAIN_POINTS = {
   'clínica odontológica': ['agenda vazia em horários ociosos', 'dificuldade em atrair pacientes de alto valor', 'dependência de indicação boca a boca'],
@@ -211,9 +211,9 @@ Regras de Comportamento:
 5. Seja direto, sem introduções robóticas do tipo "Olá, sou uma inteligência artificial".`;
 
 const getAI = () => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY;
   if (!apiKey) return null;
-  return new GoogleGenerativeAI(apiKey);
+  return new Groq({ apiKey, dangerouslyAllowBrowser: true });
 };
 
 export async function generateChatResponse(lead, userMessage, chatHistory = []) {
@@ -221,33 +221,25 @@ export async function generateChatResponse(lead, userMessage, chatHistory = []) 
     const ai = getAI();
     if (!ai) {
       return {
-        content: "⚠️ **Chave de API não configurada.** Para que eu funcione com o cérebro do Gemini, você precisa adicionar `VITE_GEMINI_API_KEY` no seu arquivo `.env.local` e reiniciar a aplicação."
+        content: "⚠️ **Chave de API não configurada.** Para que eu funcione com o cérebro do Groq (Llama 3), você precisa adicionar `VITE_GROQ_API_KEY` no seu arquivo `.env.local` e reiniciar a aplicação."
       };
     }
 
-    const model = ai.getGenerativeModel({ 
-      model: "gemini-2.0-flash",
-      systemInstruction: SOCIO_AI_SYSTEM_PROMPT,
-      generationConfig: { temperature: 0.7 }
-    });
+    const messages = [
+      { role: "system", content: SOCIO_AI_SYSTEM_PROMPT }
+    ];
 
-    // Format history for Gemini API (format: { role: 'user' | 'model', parts: [{ text: '...' }] })
-    const formattedHistory = [];
-    
+    // Format history for Groq API
     for (let i = 0; i < chatHistory.length - 1; i++) {
       const msg = chatHistory[i];
       // Skip the very first local generated welcome message
       if (i === 0 && msg.role === 'ai') continue;
       
-      formattedHistory.push({
-        role: msg.role === 'ai' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
+      messages.push({
+        role: msg.role === 'ai' ? 'assistant' : 'user',
+        content: msg.content
       });
     }
-
-    const chat = model.startChat({
-      history: formattedHistory,
-    });
 
     // Inject context on the first interaction
     let prompt = userMessage;
@@ -255,18 +247,26 @@ export async function generateChatResponse(lead, userMessage, chatHistory = []) 
       prompt = `[CONTEXTO DO LEAD - Nome: ${lead?.name || 'Desconhecido'} | Segmento: ${lead?.segment || 'Não informado'} | Bio: ${lead?.bio || 'Nenhuma'} | Primeira abordagem que enviamos: ${lead?.personalizedMessage || 'Nenhuma'}]\n\nMensagem do usuário: ${userMessage}`;
     }
 
-    const result = await chat.sendMessage(prompt);
-    const responseText = result.response.text();
+    messages.push({ role: "user", content: prompt });
+
+    const completion = await ai.chat.completions.create({
+      messages: messages,
+      model: "llama3-70b-8192",
+      temperature: 0.7,
+      max_tokens: 1024,
+    });
+
+    const responseText = completion.choices[0]?.message?.content || "";
 
     return {
       content: responseText
     };
 
   } catch (error) {
-    console.error("Erro no Gemini AI:", error);
+    console.error("Erro no Groq AI:", error);
     const errorMsg = error?.message || "Erro desconhecido";
     return {
-      content: `❌ **Falha na conexão com a IA**\n\nOcorreu um erro ao conectar com o Google Gemini. Motivo técnico: \`${errorMsg}\`\n\n*Se o erro for sobre cota (Quota exceeded) com limite 0, verifique se a região da sua conta permite a camada gratuita ou crie um novo projeto no AI Studio.*`
+      content: `❌ **Falha na conexão com a IA**\n\nOcorreu um erro ao conectar com o Groq. Motivo técnico: \`${errorMsg}\``
     };
   }
 }
