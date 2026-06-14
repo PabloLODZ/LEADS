@@ -265,8 +265,8 @@ input, textarea, select, button {
   left: 0;
   width: var(--sidebar-width);
   height: 100vh;
-  background: #0D1410;
-  border-right: 1px solid #1A2B1D;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-primary);
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -353,7 +353,7 @@ input, textarea, select, button {
   gap: var(--space-md);
   padding: 9px 14px;
   border-radius: 8px;
-  color: #7A8C7D;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 450;
   cursor: pointer;
@@ -367,22 +367,22 @@ input, textarea, select, button {
 }
 
 .nav-item:hover {
-  color: #D4F0DC;
-  background: #172012;
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .nav-item:hover svg {
-  color: #00C85A;
+  color: var(--green-primary);
 }
 
 .nav-item.active {
-  color: #00C85A;
-  background: #0D2B18;
+  color: var(--green-primary);
+  background: var(--green-dark);
   font-weight: 550;
 }
 
 .nav-item.active svg {
-  color: #00C85A;
+  color: var(--green-primary);
 }
 
 .nav-item.active::before {
@@ -405,7 +405,7 @@ input, textarea, select, button {
 
 .nav-divider {
   height: 1px;
-  background: #1A2B1D;
+  background: var(--border-primary);
   margin: 8px var(--space-md);
 }
 
