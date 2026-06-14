@@ -198,3 +198,51 @@ export function generateSocioResponses({ lead, campaign, sentMessage, receivedRe
     lightResponse,
   };
 }
+
+// Generate conversational AI responses based on user prompt and lead context
+export function generateChatResponse(lead, userMessage, chatHistory = []) {
+  const msg = userMessage.toLowerCase();
+  const name = lead?.name || 'o lead';
+  const segment = lead?.segment || 'este nicho';
+
+  // Analisa intenções / palavras-chave no prompt do usuário
+  const hasCaro = msg.includes('caro') || msg.includes('preço') || msg.includes('valor');
+  const hasReuniao = msg.includes('reunião') || msg.includes('call') || msg.includes('agendar');
+  const hasLeve = msg.includes('leve') || msg.includes('suaviza') || msg.includes('agressivo') || msg.includes('calma');
+  const hasFirme = msg.includes('firme') || msg.includes('direto') || msg.includes('pressão');
+  const hasNaoQuer = msg.includes('não quer') || msg.includes('recusou') || msg.includes('sem interesse');
+
+  let aiThought = '';
+  let suggestion = '';
+
+  if (hasCaro) {
+    aiThought = `Entendi. Objeção de preço é comum em ${segment.toLowerCase()}. Como o foco é fechar serviços premium, vamos contornar focando no valor e no retorno sobre o investimento, e não no custo.`;
+    suggestion = `Dr(a), compreendo totalmente a preocupação com o investimento. A grande questão é que focar apenas em pacientes que buscam o serviço mais barato acaba desvalorizando seu tempo. Posso te mostrar rapidamente como nossa estratégia atrai pacientes que valorizam e pagam o preço justo pelo seu trabalho?`;
+  } else if (hasNaoQuer) {
+    aiThought = `Certo. Se ele demonstrou desinteresse, não vamos forçar a barra agora. Vamos deixar a porta aberta de forma elegante, enviando um material de valor que ele possa consumir no tempo dele.`;
+    suggestion = `Sem problemas, ${name}! Entendo que talvez não seja o momento ideal. De qualquer forma, vou deixar aqui um material rápido mostrando como outros negócios da área estão se posicionando. Se um dia fizer sentido, me avisa!`;
+  } else if (hasReuniao) {
+    aiThought = `Ótimo! O lead está aquecido. Vamos ser diretos e já propor duas opções de horários para reduzir a fricção e fechar a reunião.`;
+    suggestion = `Perfeito, ${name}! Acredito que em 10 minutinhos consigo te mostrar na prática como isso vai funcionar para vocês. Como está sua agenda? Prefere amanhã na parte da manhã ou quinta à tarde?`;
+  } else if (hasLeve) {
+    aiThought = `Beleza, vamos tirar o pé do acelerador. Vou criar uma mensagem bem tranquila, sem cara de venda, só para manter a conversa fluindo.`;
+    suggestion = `Entendo, ${name}! Fica tranquilo. A ideia aqui é só compartilhar uma estratégia que achei a cara do seu negócio. Se quiser bater um papo rápido sobre isso depois, me avisa.`;
+  } else if (hasFirme) {
+    aiThought = `Ok, vamos usar uma postura mais consultiva e provocativa para fazer o lead perceber o que está perdendo.`;
+    suggestion = `${name}, respeito sua decisão, mas como acompanho o mercado de ${segment.toLowerCase()}, vejo muito dinheiro sendo deixado na mesa por falta desse tipo de ação. Se você me der 5 minutos, te provo como isso gera resultado prático.`;
+  } else {
+    // Resposta padrão caso nenhuma palavra-chave seja detectada
+    aiThought = `Certo. Para manter a conversa com ${name} produtiva, elaborei uma resposta focada nos próximos passos. O que acha desta abordagem?`;
+    suggestion = `Show, ${name}! Só para eu entender melhor: qual tem sido o maior desafio de vocês hoje em relação a isso? Pergunto porque dependendo do cenário, consigo te dar uma direção mais clara de como resolver.`;
+  }
+
+  // Modifica um pouco a saída se já houver histórico (dá ideia de continuação)
+  if (chatHistory.length > 2) {
+    aiThought = "Anotado! " + aiThought;
+  }
+
+  return {
+    content: aiThought,
+    suggestion: suggestion
+  };
+}

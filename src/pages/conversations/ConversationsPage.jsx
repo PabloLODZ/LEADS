@@ -15,7 +15,7 @@ import {
 import { useApp } from '../../contexts/AppContext.jsx';
 import { useToast } from '../../contexts/ToastContext.jsx';
 import { getInitials, getStatusColor, getStatusLabel } from '../../utils/formatters.js';
-import { generateSocioResponses } from '../../utils/messageGenerator.js';
+import { generateChatResponse } from '../../utils/messageGenerator.js';
 
 export default function ConversationsPage() {
   const { leads, campaigns, addInteraction, updateLeadStatus } = useApp();
@@ -24,9 +24,9 @@ export default function ConversationsPage() {
 
   const [selectedLead, setSelectedLead] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [receivedMessage, setReceivedMessage] = useState('');
+  const [chatInput, setChatInput] = useState('');
   const [generating, setGenerating] = useState(false);
-  const [generatedOptions, setGeneratedOptions] = useState(null);
+  const [chatHistory, setChatHistory] = useState([]);
 
   // Filter contacts: only show leads with status 'respondeu' or 'contactado'
   const contacts = leads.filter((lead) => {
@@ -40,33 +40,43 @@ export default function ConversationsPage() {
 
   const handleSelectLead = (lead) => {
     setSelectedLead(lead);
-    setReceivedMessage('');
-    setGeneratedOptions(null);
+    setChatInput('');
+    setChatHistory([{
+      role: 'ai',
+      content: `Olá! Vi que o lead **${lead.name}** é do segmento de **${lead.segment || 'negócios'}**. Cole o que ele respondeu ou me diga qual é a objeção dele para eu te ajudar a fechar essa venda.`
+    }]);
   };
 
-  const handleGenerateResponses = async () => {
-    if (!receivedMessage.trim()) {
-      toast.warning('Aviso', 'Cole a resposta enviada pelo lead antes de gerar.');
-      return;
-    }
+  const handleSendMessage = async () => {
+    if (!chatInput.trim()) return;
 
+    const userMsg = chatInput;
+    setChatInput('');
+    
+    const newHistory = [...chatHistory, { role: 'user', content: userMsg }];
+    setChatHistory(newHistory);
     setGenerating(true);
-    // Simulate short network delay
+
+    // Simulate network delay
     await new Promise((r) => setTimeout(r, 1000));
 
-    const campaign = campaigns.find((c) => c.id === selectedLead.campaignId);
-    
-    // Generate responses using helper
-    const responses = generateSocioResponses({
-      lead: selectedLead,
-      campaign,
-      sentMessage: selectedLead.personalizedMessage,
-      receivedReply: receivedMessage,
-    });
+    // Generate AI chat response
+    const response = generateChatResponse(selectedLead, userMsg, newHistory);
 
-    setGeneratedOptions(responses);
+    setChatHistory([...newHistory, {
+      role: 'ai',
+      content: response.content,
+      suggestion: response.suggestion
+    }]);
+    
     setGenerating(false);
-    toast.success('Respostas geradas!', 'O Sócio elaborou 3 caminhos de abordagem.');
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   const handleCopy = (text) => {
@@ -216,87 +226,124 @@ export default function ConversationsPage() {
             {/* Chat Body */}
             <div className="chat-main-body" style={{ flex: 1, padding: 'var(--space-xl)', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
               {/* Profile Context Banner */}
-              <div className="card card-secondary" style={{ padding: 'var(--space-md)' }}>
-                <strong style={{ fontSize: 'var(--font-size-xs)', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Bio do Lead:</strong>
+              <div className="card card-secondary" style={{ padding: 'var(--space-md)', marginBottom: 'var(--space-md)' }}>
+                <strong style={{ fontSize: 'var(--font-size-xs)', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Contexto do Lead:</strong>
                 <p style={{ fontSize: 'var(--font-size-sm)', margin: '4px 0 0 0', color: 'var(--text-secondary)' }}>{selectedLead.bio || 'Sem bio cadastrada.'}</p>
+                {selectedLead.personalizedMessage && (
+                  <div style={{ marginTop: '8px', padding: '8px', background: 'var(--bg-primary)', borderRadius: '6px', fontSize: '12px', border: '1px solid var(--border-primary)' }}>
+                    <span style={{ color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Primeira abordagem enviada:</span>
+                    <span style={{ color: 'var(--text-primary)' }}>{selectedLead.personalizedMessage}</span>
+                  </div>
+                )}
               </div>
 
-              {/* Sent initial message */}
-              {selectedLead.personalizedMessage && (
-                <div style={{ alignSelf: 'flex-end', maxWidth: '75%' }}>
-                  <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '4px', textAlign: 'right' }}>Abordagem Inicial Enviada</div>
-                  <div style={{ background: 'var(--green-active)', color: 'var(--text-primary)', padding: 'var(--space-md)', borderRadius: '12px 12px 0 12px', border: '1px solid var(--green-primary)', whiteSpace: 'pre-line', fontSize: 'var(--font-size-sm)' }}>
-                    {selectedLead.personalizedMessage}
-                  </div>
-                </div>
-              )}
+              {/* Chat History */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1 }}>
+                {chatHistory.map((msg, idx) => (
+                  <div key={idx} style={{ 
+                    display: 'flex', 
+                    gap: '12px', 
+                    flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
+                    alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                    maxWidth: '85%'
+                  }}>
+                    {/* Avatar */}
+                    <div style={{ 
+                      width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: msg.role === 'user' ? 'var(--bg-card)' : 'var(--green-dark)',
+                      border: '1px solid',
+                      borderColor: msg.role === 'user' ? 'var(--border-primary)' : 'var(--green-primary)',
+                      color: msg.role === 'user' ? 'var(--text-secondary)' : 'var(--green-primary)'
+                    }}>
+                      {msg.role === 'user' ? <User size={16} /> : <Bot size={18} />}
+                    </div>
 
-              {/* Socio AI Responses Panel */}
-              {generatedOptions ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                  <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Sparkles className="text-green" size={16} />
-                    Sugestões do Sócio
-                  </h3>
+                    {/* Bubble */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{
+                        background: msg.role === 'user' ? 'var(--bg-card)' : 'transparent',
+                        border: msg.role === 'user' ? '1px solid var(--border-primary)' : 'none',
+                        padding: msg.role === 'user' ? '12px 16px' : '0',
+                        borderRadius: msg.role === 'user' ? '12px 0 12px 12px' : '0',
+                        color: 'var(--text-primary)',
+                        fontSize: '14px',
+                        lineHeight: '1.5'
+                      }}>
+                        {/* Process bold text for AI messages */}
+                        {msg.role === 'ai' ? (
+                          <div dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                        ) : (
+                          msg.content
+                        )}
+                      </div>
 
-                  <div className="ai-response-card">
-                    <div className="ai-response-label">Resposta Direta</div>
-                    <p className="ai-response-text">{generatedOptions.directResponse}</p>
-                    <div className="ai-response-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => handleCopy(generatedOptions.directResponse)}>
-                        <Copy size={12} style={{ marginRight: '4px' }} /> Copiar
-                      </button>
-                      <button className="btn btn-primary btn-sm" onClick={() => handleUseResponse(generatedOptions.directResponse, 'Direta')}>
-                        Usar esta
-                      </button>
+                      {/* AI Suggestion Card */}
+                      {msg.suggestion && (
+                        <div style={{
+                          background: 'var(--bg-card-secondary)',
+                          border: '1px solid var(--border-primary)',
+                          borderRadius: '12px',
+                          padding: '16px',
+                          marginTop: '4px'
+                        }}>
+                          <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--green-primary)', fontWeight: '700', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Sparkles size={12} />
+                            Sugestão de Resposta
+                          </div>
+                          <p style={{ color: 'var(--text-primary)', fontSize: '14px', lineHeight: '1.5', margin: '0 0 16px 0' }}>
+                            {msg.suggestion}
+                          </p>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button className="btn btn-ghost btn-sm" onClick={() => handleCopy(msg.suggestion)}>
+                              <Copy size={14} style={{ marginRight: '6px' }} /> Copiar
+                            </button>
+                            <button className="btn btn-primary btn-sm" onClick={() => handleUseResponse(msg.suggestion, 'Chat AI')}>
+                              <Check size={14} style={{ marginRight: '6px' }} /> Salvar no histórico
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
+                ))}
 
-                  <div className="ai-response-card">
-                    <div className="ai-response-label">Resposta Firme</div>
-                    <p className="ai-response-text">{generatedOptions.firmResponse}</p>
-                    <div className="ai-response-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => handleCopy(generatedOptions.firmResponse)}>
-                        <Copy size={12} style={{ marginRight: '4px' }} /> Copiar
-                      </button>
-                      <button className="btn btn-primary btn-sm" onClick={() => handleUseResponse(generatedOptions.firmResponse, 'Firme')}>
-                        Usar esta
-                      </button>
+                {generating && (
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--green-dark)', border: '1px solid var(--green-primary)', color: 'var(--green-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Bot size={18} />
                     </div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Digitando...</div>
                   </div>
+                )}
+              </div>
+            </div>
 
-                  <div className="ai-response-card">
-                    <div className="ai-response-label">Resposta Leve</div>
-                    <p className="ai-response-text">{generatedOptions.lightResponse}</p>
-                    <div className="ai-response-actions">
-                      <button className="btn btn-ghost btn-sm" onClick={() => handleCopy(generatedOptions.lightResponse)}>
-                        <Copy size={12} style={{ marginRight: '4px' }} /> Copiar
-                      </button>
-                      <button className="btn btn-primary btn-sm" onClick={() => handleUseResponse(generatedOptions.lightResponse, 'Leve')}>
-                        Usar esta
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)', marginTop: 'auto' }}>
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="socio-reply-input">Cole aqui o que o lead respondeu no WhatsApp:</label>
-                    <textarea
-                      id="socio-reply-input"
-                      className="form-input"
-                      rows={4}
-                      placeholder="Ex: 'Olá, tenho interesse sim. Quanto custa o serviço?'"
-                      value={receivedMessage}
-                      onChange={(e) => setReceivedMessage(e.target.value)}
-                    ></textarea>
-                  </div>
-                  <button className="btn btn-primary" onClick={handleGenerateResponses} disabled={generating || !receivedMessage.trim()}>
-                    <Zap size={16} style={{ marginRight: '8px' }} />
-                    {generating ? 'Gerando respostas...' : 'Gerar alternativas com o Sócio'}
-                  </button>
-                </div>
-              )}
+            {/* Chat Input Area */}
+            <div style={{ padding: 'var(--space-md) var(--space-xl)', borderTop: '1px solid var(--border-primary)', background: 'var(--bg-primary)' }}>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', background: 'var(--bg-card)', border: '1px solid var(--border-primary)', borderRadius: '12px', padding: '8px' }}>
+                <textarea
+                  className="form-input"
+                  style={{ border: 'none', background: 'transparent', width: '100%', resize: 'none', padding: '8px', maxHeight: '120px', minHeight: '44px' }}
+                  rows={chatInput.split('\n').length > 1 ? Math.min(chatInput.split('\n').length, 4) : 1}
+                  placeholder="Cole o que o lead respondeu ou peça uma sugestão..."
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={generating}
+                />
+                <button 
+                  className="btn btn-primary" 
+                  style={{ width: '40px', height: '40px', padding: 0, borderRadius: '8px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  onClick={handleSendMessage}
+                  disabled={generating || !chatInput.trim()}
+                >
+                  <ArrowRight size={18} />
+                </button>
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '8px' }}>
+                O Sócio AI pode cometer erros. Revise a mensagem antes de enviar para o lead.
+              </div>
             </div>
           </>
         ) : (
