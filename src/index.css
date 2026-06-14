@@ -89,7 +89,7 @@
   --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Layout */
-  --sidebar-width: 260px;
+  --sidebar-width: 220px;
   --sidebar-collapsed-width: 72px;
   --topbar-height: 0px;
 }
@@ -264,8 +264,8 @@ input, textarea, select, button {
   left: 0;
   width: var(--sidebar-width);
   height: 100vh;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-subtle);
+  background: #0D1410;
+  border-right: 1px solid #1A2B1D;
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -281,7 +281,7 @@ input, textarea, select, button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-lg) var(--space-lg);
+  padding: 20px var(--space-lg);
   min-height: 64px;
 }
 
@@ -350,11 +350,11 @@ input, textarea, select, button {
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  padding: var(--space-md) var(--space-md);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: var(--font-size-base);
-  font-weight: 500;
+  padding: 9px 14px;
+  border-radius: 8px;
+  color: #7A8C7D;
+  font-size: 14px;
+  font-weight: 450;
   cursor: pointer;
   transition: all var(--transition-fast);
   text-decoration: none;
@@ -366,25 +366,26 @@ input, textarea, select, button {
 }
 
 .nav-item:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: #D4F0DC;
+  background: #172012;
+}
+
+.nav-item:hover svg {
+  color: #00C85A;
 }
 
 .nav-item.active {
-  color: var(--green-primary);
-  background: var(--green-active);
+  color: #00C85A;
+  background: #0D2B18;
+  font-weight: 550;
+}
+
+.nav-item.active svg {
+  color: #00C85A;
 }
 
 .nav-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 20px;
-  background: var(--green-primary);
-  border-radius: 0 2px 2px 0;
+  display: none;
 }
 
 .nav-item svg {
@@ -403,8 +404,8 @@ input, textarea, select, button {
 
 .nav-divider {
   height: 1px;
-  background: var(--border-subtle);
-  margin: var(--space-sm) var(--space-md);
+  background: #1A2B1D;
+  margin: 8px var(--space-md);
 }
 
 /* Sidebar Footer */

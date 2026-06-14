@@ -79,7 +79,7 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
             end={item.end || false}
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
-            <item.icon size={20} />
+            <item.icon size={16} />
             <span className="nav-label">{item.label}</span>
           </NavLink>
         ))}
@@ -89,7 +89,7 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
             to="/admin"
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
-            <Shield size={20} />
+            <Shield size={16} />
             <span className="nav-label">Admin</span>
           </NavLink>
         )}
@@ -102,13 +102,13 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
             to={item.to}
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
-            <item.icon size={20} />
+            <item.icon size={16} />
             <span className="nav-label">{item.label}</span>
           </NavLink>
         ))}
 
         <button className="nav-item" onClick={onFeedbackClick}>
-          <MessageSquare size={20} />
+          <MessageSquare size={16} />
           <span className="nav-label">Feedback</span>
         </button>
       </nav>
@@ -116,17 +116,17 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
       {/* Footer */}
       <div className="sidebar-footer" style={{ padding: 'var(--space-md)', display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
         {/* Simplified Credit Card */}
-        <div style={{ padding: '12px', background: 'var(--bg-card-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-primary)' }}>
+        <div style={{ padding: '12px', background: '#111A14', borderRadius: '8px', border: '1px solid #1E2E21' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)' }}>CRÉDITOS</span>
-            <Zap size={14} style={{ color: 'var(--green-primary)' }} />
+            <span style={{ fontSize: '10px', fontWeight: '600', color: '#4A5C4D', textTransform: 'uppercase' }}>CRÉDITOS</span>
+            <Zap size={14} style={{ color: '#00C85A' }} />
           </div>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
-            {isAdmin ? 'Ilimitado' : totalCredits} <span style={{ fontSize: '11px', fontWeight: '400', color: 'var(--text-muted)' }}>restantes</span>
+          <div style={{ fontSize: '20px', fontWeight: '700', color: '#F0F4F1', marginBottom: '4px' }}>
+            {isAdmin ? 'Ilimitado' : totalCredits} <span style={{ fontSize: '12px', fontWeight: '400', color: '#7A8C7D' }}>restantes</span>
           </div>
           {!isAdmin && (
-            <div style={{ width: '100%', height: '4px', background: 'var(--bg-hover)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
-              <div style={{ width: `${Math.max(0, 100 - usedPercent)}%`, height: '100%', background: 'var(--green-primary)' }} />
+            <div style={{ width: '100%', height: '3px', background: '#1E2E21', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
+              <div style={{ width: `${Math.max(0, 100 - usedPercent)}%`, height: '100%', background: '#00C85A' }} />
             </div>
           )}
         </div>
