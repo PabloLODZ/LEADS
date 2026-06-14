@@ -226,7 +226,7 @@ export async function generateChatResponse(lead, userMessage, chatHistory = []) 
     }
 
     const model = ai.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction: SOCIO_AI_SYSTEM_PROMPT,
       generationConfig: { temperature: 0.7 }
     });
