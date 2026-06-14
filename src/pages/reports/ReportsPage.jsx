@@ -30,27 +30,38 @@ function isWithinPeriod(dateStr, days) {
   return date >= cutoff;
 }
 
-function KpiCard({ icon: Icon, label, value, color = 'var(--green-primary)', sub, onClick }) {
+function KpiCard({ icon: Icon, label, value, color = '#00C85A', sub, onClick }) {
   return (
     <div
-      className="stat-card"
       onClick={onClick}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ 
+        background: '#111A14',
+        border: '1px solid #1E2E21',
+        borderRadius: '12px',
+        padding: '24px',
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'border-color 0.2s',
+      }}
+      onMouseEnter={(e) => { if(onClick) e.currentTarget.style.borderColor = color; }}
+      onMouseLeave={(e) => { if(onClick) e.currentTarget.style.borderColor = '#1E2E21'; }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
         <div style={{
-          width: '36px', height: '36px', borderRadius: 'var(--radius-md)',
-          background: `${color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: '40px', height: '40px', borderRadius: '10px',
+          background: `${color}1A`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: `1px solid ${color}33`
         }}>
-          <Icon size={18} color={color} />
+          <Icon size={20} color={color} />
         </div>
-        {onClick && <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />}
+        {onClick && <ChevronRight size={16} style={{ color: '#4A5C4D' }} />}
       </div>
-      <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1 }}>
+      <div style={{ fontSize: '32px', fontWeight: '800', color: '#F0F4F1', lineHeight: 1, letterSpacing: '-0.02em' }}>
         {value}
       </div>
-      <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>{label}</div>
-      {sub && <div style={{ fontSize: '11px', color, marginTop: '4px', fontWeight: '600' }}>{sub}</div>}
+      <div style={{ fontSize: '13px', color: '#7A8C7D', marginTop: '8px', fontWeight: '500' }}>{label}</div>
+      {sub && <div style={{ fontSize: '12px', color, marginTop: '8px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <TrendingUp size={12} /> {sub}
+      </div>}
     </div>
   );
 }
@@ -164,8 +175,17 @@ export default function ReportsPage() {
             <button
               key={p.id}
               onClick={() => setPeriod(p.id)}
-              className={`pill ${period === p.id ? 'active' : ''}`}
-              style={{ padding: '6px 14px', fontSize: '12px' }}
+              style={{ 
+                padding: '8px 4px', 
+                fontSize: '13px', 
+                fontWeight: '500', 
+                background: 'transparent',
+                border: 'none',
+                color: period === p.id ? '#F0F4F1' : '#7A8C7D',
+                borderBottom: period === p.id ? '2px solid #00C85A' : '2px solid transparent',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
             >
               {p.label}
             </button>
@@ -189,39 +209,39 @@ export default function ReportsPage() {
         <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-xl)', flexWrap: 'wrap' }}>
           {leadsAtrasados.length > 0 && (
             <div style={{
-              background: 'var(--color-warning-bg)', border: '1px solid var(--color-warning)',
-              borderRadius: 'var(--radius-md)', padding: '10px 16px',
-              display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flex: '1 1 auto',
+              background: '#2B1F0A', border: '1px solid #4A3010',
+              borderRadius: '8px', padding: '12px 16px',
+              display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 auto',
             }} onClick={() => navigate('/leads?status=follow_up')}>
-              <AlertTriangle size={16} color="var(--color-warning)" />
-              <span style={{ fontSize: '13px', color: 'var(--color-warning)', fontWeight: '600' }}>
+              <AlertTriangle size={18} color="#F5A623" />
+              <span style={{ fontSize: '13px', color: '#F5A623', fontWeight: '600' }}>
                 {leadsAtrasados.length} retorno{leadsAtrasados.length !== 1 ? 's' : ''} atrasado{leadsAtrasados.length !== 1 ? 's' : ''}
               </span>
-              <ChevronRight size={13} style={{ color: 'var(--color-warning)', marginLeft: 'auto' }} />
+              <ChevronRight size={14} style={{ color: '#F5A623', marginLeft: 'auto' }} />
             </div>
           )}
           {leadsSemResposta > 0 && (
             <div style={{
-              background: 'var(--color-info-bg)', border: '1px solid var(--color-info)',
-              borderRadius: 'var(--radius-md)', padding: '10px 16px',
-              display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', flex: '1 1 auto',
+              background: '#0D2B18', border: '1px solid #1A4A28',
+              borderRadius: '8px', padding: '12px 16px',
+              display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: '1 1 auto',
             }} onClick={() => navigate('/leads?status=contactado')}>
-              <MessageCircle size={16} color="var(--color-info)" />
-              <span style={{ fontSize: '13px', color: 'var(--color-info)', fontWeight: '600' }}>
+              <MessageCircle size={18} color="#00C85A" />
+              <span style={{ fontSize: '13px', color: '#00C85A', fontWeight: '600' }}>
                 {leadsSemResposta} lead{leadsSemResposta !== 1 ? 's' : ''} sem resposta
               </span>
-              <ChevronRight size={13} style={{ color: 'var(--color-info)', marginLeft: 'auto' }} />
+              <ChevronRight size={14} style={{ color: '#00C85A', marginLeft: 'auto' }} />
             </div>
           )}
           {bestCampaign && (
             <div style={{
-              background: 'var(--green-glow)', border: '1px solid var(--green-primary)',
-              borderRadius: 'var(--radius-md)', padding: '10px 16px',
-              display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 auto',
+              background: '#111A14', border: '1px solid #1E2E21',
+              borderRadius: '8px', padding: '12px 16px',
+              display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 auto',
             }}>
-              <Zap size={16} color="var(--green-primary)" />
-              <span style={{ fontSize: '13px', color: 'var(--green-primary)', fontWeight: '600' }}>
-                "{bestCampaign.name}" tem melhor taxa de resposta ({bestCampaign.taxaResposta}%)
+              <Zap size={18} color="#3B82F6" />
+              <span style={{ fontSize: '13px', color: '#F0F4F1', fontWeight: '500' }}>
+                "<strong style={{ color: '#3B82F6' }}>{bestCampaign.name}</strong>" tem melhor taxa de resposta ({bestCampaign.taxaResposta}%)
               </span>
             </div>
           )}
@@ -234,21 +254,21 @@ export default function ReportsPage() {
           icon={Users}
           label="Leads Gerados"
           value={totalLeads}
-          color="var(--color-primary)"
+          color="#F0F4F1"
           onClick={() => navigate('/leads')}
         />
         <KpiCard
           icon={Target}
           label="Abordados"
           value={abordados}
-          color="var(--color-info)"
+          color="#3B82F6"
           onClick={() => navigate(`/leads?status=contactado`)}
         />
         <KpiCard
           icon={MessageCircle}
           label="Respostas"
           value={responderam}
-          color="var(--color-warning)"
+          color="#F5A623"
           sub={`${taxaResposta}% de conversão`}
           onClick={() => navigate(`/leads?status=respondeu`)}
         />
@@ -256,20 +276,21 @@ export default function ReportsPage() {
           icon={CheckCircle}
           label="Fechados (Ganho)"
           value={fechados}
-          color="var(--green-primary)"
+          color="#00C85A"
           sub={`${taxaConversao}% win rate global`}
           onClick={() => navigate(`/leads?status=fechado`)}
         />
       </div>
 
       {isStarter ? (
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-3xl)', textAlign: 'center', background: 'var(--bg-card-secondary)' }}>
-          <Sparkles size={32} style={{ color: 'var(--color-warning)', marginBottom: 'var(--space-md)' }} />
-          <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: '700', marginBottom: 'var(--space-sm)' }}>Desbloqueie Relatórios Avançados</h3>
-          <p style={{ color: 'var(--text-muted)', maxWidth: '400px', marginBottom: 'var(--space-lg)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center', background: 'linear-gradient(180deg, #111A14 0%, #0A0F0D 100%)', border: '1px solid #1E2E21', borderRadius: '16px', position: 'relative', overflow: 'hidden', marginBottom: '24px' }}>
+          <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(0,200,90,0.1) 0%, rgba(0,0,0,0) 70%)' }}></div>
+          <Sparkles size={40} style={{ color: '#F5A623', marginBottom: '16px' }} />
+          <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#F0F4F1', marginBottom: '8px' }}>Desbloqueie Relatórios Avançados</h3>
+          <p style={{ color: '#7A8C7D', maxWidth: '420px', marginBottom: '24px', fontSize: '14px', lineHeight: '1.5' }}>
             Faça upgrade para Growth ou superior para acessar métricas avançadas, performance de campanhas, motivos de perda e exportações de dados.
           </p>
-          <button className="btn btn-primary" onClick={() => navigate('/configuracoes')}>Fazer Upgrade</button>
+          <button className="btn btn-primary" onClick={() => navigate('/configuracoes')} style={{ background: '#F5A623', color: '#0A0F0D', border: 'none', padding: '10px 24px', fontWeight: '600' }}>Fazer Upgrade para Pro</button>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--space-xl)', marginBottom: 'var(--space-2xl)' }}>

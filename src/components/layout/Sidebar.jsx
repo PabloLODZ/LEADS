@@ -29,7 +29,10 @@ import { getPlanById } from '../../data/plans.js';
 export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCredits }) {
   const { user, isAdmin, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { leads } = useApp();
   const navigate = useNavigate();
+
+  const unreadCount = leads?.filter(l => l.status === 'novo').length || 0;
 
   const totalCredits = getTotalCredits(user?.creditWallet);
   const plan = getPlanById(user?.planId);
@@ -81,6 +84,30 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
           >
             <item.icon size={16} />
             <span className="nav-label">{item.label}</span>
+            {item.to === '/relatorios' && unreadCount > 0 && !collapsed && (
+              <span style={{ 
+                background: '#E5383B', 
+                color: '#fff', 
+                fontSize: '11px', 
+                fontWeight: '700', 
+                padding: '2px 6px', 
+                borderRadius: '10px', 
+                marginLeft: 'auto' 
+              }}>
+                {unreadCount}
+              </span>
+            )}
+            {item.to === '/relatorios' && unreadCount > 0 && collapsed && (
+              <span style={{
+                position: 'absolute',
+                top: '6px',
+                right: '6px',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: '#E5383B'
+              }} />
+            )}
           </NavLink>
         ))}
 

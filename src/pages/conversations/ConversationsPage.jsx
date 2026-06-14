@@ -101,26 +101,26 @@ export default function ConversationsPage() {
   return (
     <div className="chat-layout" style={{ display: 'flex', height: 'calc(100vh - 0px)', overflow: 'hidden' }}>
       {/* LEFT SIDEBAR contacts */}
-      <div className="chat-sidebar" style={{ width: '320px', borderRight: '1px solid var(--border-primary)', display: 'flex', flexDirection: 'column', background: 'var(--bg-sidebar)' }}>
-        <div className="chat-sidebar-header" style={{ padding: 'var(--space-lg)', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ background: 'var(--green-glow)', color: 'var(--green-primary)', padding: '6px', borderRadius: '8px' }}>
-              <Bot size={20} />
+      <div className="chat-sidebar" style={{ width: '320px', borderRight: '1px solid #1A2B1D', display: 'flex', flexDirection: 'column', background: '#0A0F0D' }}>
+        <div className="chat-sidebar-header" style={{ padding: '20px 16px', borderBottom: '1px solid #1A2B1D', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ color: '#00C85A' }}>
+              <Bot size={24} />
             </div>
-            <span style={{ fontWeight: '700', fontSize: 'var(--font-size-md)', color: 'var(--text-primary)' }}>Sócio AI</span>
+            <span style={{ fontWeight: '600', fontSize: '16px', color: '#F0F4F1' }}>Sócio AI</span>
           </div>
           {respondeuCount > 0 && (
-            <span className="badge badge-green">{respondeuCount} aguardando</span>
+            <span style={{ background: '#0D2B18', color: '#00C85A', fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '12px' }}>{respondeuCount} novos</span>
           )}
         </div>
 
         {/* Search */}
-        <div style={{ padding: 'var(--space-md)', position: 'relative' }}>
-          <Search size={14} style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        <div style={{ padding: '16px', position: 'relative' }}>
+          <Search size={14} style={{ position: 'absolute', left: '28px', top: '50%', transform: 'translateY(-50%)', color: '#4A5C4D' }} />
           <input
             type="text"
             className="form-input"
-            style={{ paddingLeft: '32px', width: '100%', fontSize: 'var(--font-size-xs)' }}
+            style={{ paddingLeft: '36px', width: '100%', fontSize: '13px', background: '#111A14', borderColor: '#1E2E21' }}
             placeholder="Buscar lead..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -128,7 +128,7 @@ export default function ConversationsPage() {
         </div>
 
         {/* Contact list */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 var(--space-xs)' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 8px' }} className="hide-scrollbar">
           {contacts.map((contact) => {
             const isActive = selectedLead?.id === contact.id;
             return (
@@ -139,12 +139,19 @@ export default function ConversationsPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
-                  padding: 'var(--space-md)',
-                  margin: '4px var(--space-sm)',
-                  borderRadius: 'var(--radius-md)',
+                  padding: '12px',
+                  margin: '4px 0',
+                  borderRadius: '8px',
                   cursor: 'pointer',
-                  background: isActive ? 'var(--green-active)' : '',
-                  border: isActive ? '1px solid var(--green-primary)' : '1px solid transparent',
+                  background: isActive ? '#0D2B18' : 'transparent',
+                  border: isActive ? '1px solid #00C85A' : '1px solid transparent',
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) e.currentTarget.style.background = '#111A14';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) e.currentTarget.style.background = 'transparent';
                 }}
                 onClick={() => handleSelectLead(contact)}
               >
@@ -152,34 +159,34 @@ export default function ConversationsPage() {
                   style={{
                     width: '36px',
                     height: '36px',
-                    borderRadius: '50%',
-                    background: 'var(--bg-card-secondary)',
-                    border: '1px solid var(--border-primary)',
+                    borderRadius: '8px',
+                    background: '#111A14',
+                    border: '1px solid #1E2E21',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: '600',
-                    fontSize: 'var(--font-size-xs)',
-                    color: 'var(--text-primary)',
+                    fontSize: '12px',
+                    color: '#00C85A',
                   }}
                 >
                   {getInitials(contact.name)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: '600', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontWeight: '550', fontSize: '13px', color: '#F0F4F1', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     {contact.name}
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontSize: '12px', color: '#7A8C7D', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     {getCampaignName(contact.campaignId)}
                   </div>
                 </div>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: contact.status === 'respondeu' ? 'var(--green-primary)' : 'var(--color-info)' }}></span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: contact.status === 'respondeu' ? '#00C85A' : '#3B82F6' }}></span>
               </div>
             );
           })}
 
           {contacts.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>
+            <div style={{ textAlign: 'center', padding: '32px', color: '#7A8C7D', fontSize: '13px' }}>
               Nenhum contato encontrado.
             </div>
           )}
@@ -295,32 +302,15 @@ export default function ConversationsPage() {
         ) : (
           /* Default state when no lead selected */
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: 'var(--space-3xl)', textAlign: 'center' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--green-glow)', color: 'var(--green-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 'var(--space-lg)' }}>
-              <Bot size={32} />
+            <div style={{ color: '#1E2E21', marginBottom: '24px' }}>
+              <Bot size={48} />
             </div>
-            <h2 style={{ fontSize: 'var(--font-size-xl)', fontWeight: '700', color: 'var(--text-primary)', marginBottom: 'var(--space-sm)' }}>
-              Conversa com o Sócio AI
+            <h2 style={{ fontSize: '20px', fontWeight: '500', color: '#F0F4F1', marginBottom: '12px' }}>
+              Selecione uma conversa
             </h2>
-            <p style={{ color: 'var(--text-muted)', maxWidth: '500px', marginBottom: 'var(--space-2xl)', fontSize: 'var(--font-size-sm)' }}>
-              Quando um lead responder à sua prospecção inicial no WhatsApp, cole a resposta dele aqui. 
-              O Sócio lerá o contexto da campanha e criará três jeitos inteligentes de continuar o diálogo.
+            <p style={{ color: '#7A8C7D', maxWidth: '420px', fontSize: '14px', lineHeight: '1.5' }}>
+              Escolha um lead na barra lateral para gerar respostas inteligentes com o Sócio AI baseadas no histórico da campanha.
             </p>
-
-            {/* Steps Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-lg)', width: '100%', maxWidth: '600px' }}>
-              <div className="card" style={{ padding: 'var(--space-md)' }}>
-                <span className="text-green" style={{ fontWeight: '700', fontSize: 'var(--font-size-base)' }}>1. Selecione</span>
-                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)', marginTop: '4px' }}>Escolha um lead respondido ou abordado na lista ao lado.</p>
-              </div>
-              <div className="card" style={{ padding: 'var(--space-md)' }}>
-                <span className="text-green" style={{ fontWeight: '700', fontSize: 'var(--font-size-base)' }}>2. Cole a resposta</span>
-                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)', marginTop: '4px' }}>Insira a mensagem que você recebeu no WhatsApp.</p>
-              </div>
-              <div className="card" style={{ padding: 'var(--space-md)' }}>
-                <span className="text-green" style={{ fontWeight: '700', fontSize: 'var(--font-size-base)' }}>3. Copie o melhor</span>
-                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)', marginTop: '4px' }}>Selecione o tom ideal e responda ao cliente em segundos.</p>
-              </div>
-            </div>
           </div>
         )}
       </div>

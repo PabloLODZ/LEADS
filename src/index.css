@@ -142,6 +142,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
 html {
@@ -183,13 +184,13 @@ input, textarea, select, button {
 }
 
 /* ---- Scrollbar ---- */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-primary);
-  border-radius: var(--radius-full);
+  background: #1E2E21;
+  border-radius: 2px;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+::-webkit-scrollbar-thumb:hover { background: #2A3E2D; }
 
 /* ============================================
    LAYOUT
@@ -579,13 +580,13 @@ input, textarea, select, button {
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: var(--space-md) var(--space-lg);
-  font-size: var(--font-size-base);
+  padding: 9px 18px;
+  font-size: 13px;
   font-weight: 600;
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 150ms ease;
   white-space: nowrap;
   text-decoration: none;
   line-height: 1.4;
@@ -596,37 +597,41 @@ input, textarea, select, button {
   cursor: not-allowed;
 }
 
-.btn svg { width: 18px; height: 18px; }
+.btn svg { width: 16px; height: 16px; }
 
 .btn-primary {
-  background: var(--green-primary);
-  color: var(--text-inverse);
-  border-color: var(--green-primary);
+  background: #00C85A;
+  color: #000000;
+  border-color: #00C85A;
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--green-hover);
-  border-color: var(--green-hover);
-  box-shadow: var(--shadow-glow);
+  background: #00A84A;
+  border-color: #00A84A;
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border-color: var(--border-primary);
+  background: transparent;
+  color: #7A8C7D;
+  border-color: #1E2E21;
 }
 .btn-secondary:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--text-muted);
+  background: #111A14;
+  border-color: #2A3E2D;
+  color: #F0F4F1;
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--text-secondary);
+  color: #7A8C7D;
   border-color: transparent;
 }
 .btn-ghost:hover:not(:disabled) {
-  background: var(--bg-hover);
   color: var(--text-primary);
+}
+.btn-ghost.delete:hover:not(:disabled),
+.btn-ghost-danger:hover:not(:disabled) {
+  color: #E5383B;
 }
 
 .btn-danger {

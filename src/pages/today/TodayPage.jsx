@@ -129,52 +129,54 @@ export default function TodayPage() {
         <div style={{ display: 'flex', gap: '8px', flexShrink: 0, alignItems: 'center' }}>
           {lead.personalizedMessage && (
             <button className="btn btn-ghost btn-sm" style={{ padding: '6px' }} onClick={() => copyMsg(lead)} title="Copiar mensagem">
-              <Copy size={14} />
+              <Copy size={16} />
             </button>
           )}
 
           {lead.whatsappUrl && (
             <button className="btn btn-ghost btn-sm" style={{ padding: '6px', color: '#25D366' }} onClick={() => openWhatsApp(lead)} title="Abrir WhatsApp">
-              <MessageCircle size={14} />
+              <MessageCircle size={16} />
             </button>
           )}
 
           {tab === 'novo' && (
             <button
               className="btn btn-sm btn-ghost"
-              style={{ fontSize: '12px', padding: '6px 12px' }}
+              style={{ padding: '6px', color: 'var(--color-success)' }}
               disabled={busy('contactado')}
               onClick={() => markStatus(lead, 'contactado', 'Contactado')}
+              title="Marcar como abordado"
             >
-              <Check size={12} /> {busy('contactado') ? '...' : 'Abordado'}
+              <Check size={16} />
             </button>
           )}
 
           {tab === 'respondeu' && (
             <button
               className="btn btn-sm btn-primary"
-              style={{ fontSize: '12px', padding: '5px 10px' }}
+              style={{ padding: '6px' }}
               disabled={busy('follow_up')}
               onClick={() => markStatus(lead, 'follow_up', 'Follow-up')}
+              title="Agendar retorno"
             >
-              <Calendar size={12} /> {busy('follow_up') ? '...' : 'Agendar retorno'}
+              <Calendar size={16} />
             </button>
           )}
 
           {tab === 'follow_up' && (
-            <button className="btn btn-sm btn-ghost" style={{ fontSize: '12px', padding: '6px 12px' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')}>
-              {busy('_cont') ? '...' : <><MessageCircle size={12} style={{ marginRight: '4px' }} /> Novo FUP</>}
+            <button className="btn btn-sm btn-ghost" style={{ padding: '6px', color: 'var(--color-success)' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')} title="Novo FUP">
+              <Check size={16} />
             </button>
           )}
 
           {tab === 'atrasados' && (
-            <button className="btn btn-sm btn-ghost" style={{ fontSize: '12px', padding: '6px 12px' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')}>
-              {busy('_cont') ? '...' : <><MessageCircle size={12} style={{ marginRight: '4px' }} /> FUP</>}
+            <button className="btn btn-sm btn-ghost" style={{ padding: '6px', color: 'var(--color-success)' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')} title="FUP">
+              <Check size={16} />
             </button>
           )}
 
-          <button className="btn btn-ghost btn-sm" style={{ padding: '4px' }} onClick={() => navigate(`/leads?id=${lead.id}`)}>
-            <ChevronRight size={14} />
+          <button className="btn btn-ghost btn-sm" style={{ padding: '6px' }} onClick={() => navigate(`/leads?id=${lead.id}`)}>
+            <ChevronRight size={16} />
           </button>
         </div>
       </div>
@@ -185,9 +187,9 @@ export default function TodayPage() {
     return (
       <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>
         <Header greeting={greeting} userName={userName} dayOfWeek={dayOfWeek} formattedDate={formattedDate} onNew={() => navigate('/campanhas')} />
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--space-3xl)' }}>
-          <div style={{ background: 'var(--green-glow)', color: 'var(--green-primary)', padding: 'var(--space-lg)', borderRadius: '50%', marginBottom: '16px' }}>
-            <Target size={32} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--space-3xl)' }}>
+          <div style={{ color: '#1E2E21', marginBottom: '16px' }}>
+            <Target size={48} />
           </div>
           <h3 style={{ fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>Nenhum lead ainda</h3>
           <p style={{ color: 'var(--text-muted)', maxWidth: '380px', marginBottom: '20px' }}>
