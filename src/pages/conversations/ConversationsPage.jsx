@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   MessageCircle,
@@ -41,11 +41,30 @@ export default function ConversationsPage() {
   const handleSelectLead = (lead) => {
     setSelectedLead(lead);
     setChatInput('');
-    setChatHistory([{
-      role: 'ai',
-      content: `Olá! Vi que o lead **${lead.name}** é do segmento de **${lead.segment || 'negócios'}**. Cole o que ele respondeu ou me diga qual é a objeção dele para eu te ajudar a fechar essa venda.`
-    }]);
+    
+    const savedHistory = localStorage.getItem(`chatHistory_${lead.id}`);
+    if (savedHistory) {
+      try {
+        setChatHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        setChatHistory([{
+          role: 'ai',
+          content: `Olá! Vi que o lead **${lead.name}** é do segmento de **${lead.segment || 'negócios'}**. Cole o que ele respondeu ou me diga qual é a objeção dele para eu te ajudar a fechar essa venda.`
+        }]);
+      }
+    } else {
+      setChatHistory([{
+        role: 'ai',
+        content: `Olá! Vi que o lead **${lead.name}** é do segmento de **${lead.segment || 'negócios'}**. Cole o que ele respondeu ou me diga qual é a objeção dele para eu te ajudar a fechar essa venda.`
+      }]);
+    }
   };
+
+  useEffect(() => {
+    if (selectedLead && chatHistory.length > 0) {
+      localStorage.setItem(`chatHistory_${selectedLead.id}`, JSON.stringify(chatHistory));
+    }
+  }, [chatHistory, selectedLead]);
 
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
