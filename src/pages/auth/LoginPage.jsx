@@ -57,9 +57,6 @@ export default function LoginPage() {
       <div className="auth-card">
         {/* Logo */}
         <div className="auth-logo">
-          <div className="logo-icon">
-            <Radar />
-          </div>
           <span className="logo-text">LODZ</span>
         </div>
 
@@ -128,10 +125,7 @@ export default function LoginPage() {
         </form>
 
         {/* Footer */}
-        <div className="auth-footer">
-          Não tem conta?{' '}
-          <Link to="/cadastro">Criar conta</Link>
-        </div>
+        {/* Footer removed */}
       </div>
     </div>
   );

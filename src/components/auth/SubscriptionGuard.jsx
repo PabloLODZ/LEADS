@@ -41,7 +41,6 @@ export default function SubscriptionGuard({ children }) {
         {/* Simple Header */}
         <header style={{ padding: '24px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-primary)', background: 'var(--bg-card)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="logo-icon" style={{ width: 32, height: 32 }}><Radar size={18} /></div>
             <span className="logo-text" style={{ fontSize: '18px' }}>LODZ</span>
           </div>
           <button className="btn btn-ghost" onClick={logout}><LogOut size={16} style={{ marginRight: '6px' }} /> Sair da conta</button>

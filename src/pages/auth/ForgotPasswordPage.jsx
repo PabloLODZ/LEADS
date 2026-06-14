@@ -54,9 +54,6 @@ export default function ForgotPasswordPage() {
       <div className="auth-card">
         {/* Logo */}
         <div className="auth-logo">
-          <div className="logo-icon">
-            <Radar />
-          </div>
           <span className="logo-text">LODZ</span>
         </div>
 

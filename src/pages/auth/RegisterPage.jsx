@@ -61,9 +61,6 @@ export default function RegisterPage() {
       <div className="auth-card">
         {/* Logo */}
         <div className="auth-logo">
-          <div className="logo-icon">
-            <Radar />
-          </div>
           <span className="logo-text">LODZ</span>
         </div>
 
@@ -71,10 +68,7 @@ export default function RegisterPage() {
         <h1 className="auth-title">Criar conta</h1>
         <p className="auth-subtitle">Comece a gerar leads qualificados</p>
 
-        {/* Offer badge */}
-        <div className="auth-offer">
-          🚀 7 dias por R$ 9,90 · acesso completo
-        </div>
+        {/* Offer badge removed */}
 
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate>

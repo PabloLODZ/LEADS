@@ -63,9 +63,6 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
       {/* Header */}
       <div className="sidebar-header">
         <NavLink to="/hoje" className="sidebar-logo">
-          <div className="logo-icon">
-            <Radar />
-          </div>
           <span className="logo-text">LODZ</span>
         </NavLink>
         <button className="sidebar-toggle" onClick={onToggle} title={collapsed ? 'Expandir' : 'Recolher'}>
