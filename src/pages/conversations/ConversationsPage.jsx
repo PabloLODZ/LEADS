@@ -80,12 +80,12 @@ export default function ConversationsPage() {
 
   const handleToolClick = async (tool) => {
     if (!hasAccess(tool.plan)) {
-      toast.error('Plano incompatível', \`A ferramenta "\${tool.title}" é exclusiva do plano \${tool.plan.toUpperCase()}. Faça o upgrade!\`);
+      toast.error('Plano incompatível', `A ferramenta "${tool.title}" é exclusiva do plano ${tool.plan.toUpperCase()}. Faça o upgrade!`);
       return;
     }
     
     // Simulate sending a hidden user message that asks for the tool output
-    const userMsg = \`[SÓCIO AI TOOL: \${tool.title}] \${tool.prompt}\`;
+    const userMsg = `[SÓCIO AI TOOL: ${tool.title}] ${tool.prompt}`;
     
     // We add the tool request to the history so AI knows context, but we can optionally format it nicely
     const newHistory = [...chatHistory, { role: 'user', content: userMsg }];
