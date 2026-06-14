@@ -1,8 +1,8 @@
 // ==================================================
 // LODZ - Gerador de Mensagens Personalizadas
 // ==================================================
-// Função que simula IA para gerar abordagens personalizadas
-// Preparada para conectar com API de IA no futuro
+// Função que conecta com a API do Google Gemini
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const PAIN_POINTS = {
   'clínica odontológica': ['agenda vazia em horários ociosos', 'dificuldade em atrair pacientes de alto valor', 'dependência de indicação boca a boca'],
@@ -200,49 +200,72 @@ export function generateSocioResponses({ lead, campaign, sentMessage, receivedRe
 }
 
 // Generate conversational AI responses based on user prompt and lead context
-export function generateChatResponse(lead, userMessage, chatHistory = []) {
-  const msg = userMessage.toLowerCase();
-  const name = lead?.name || 'o lead';
-  const segment = lead?.segment || 'este nicho';
+const SOCIO_AI_SYSTEM_PROMPT = `Você é o "Sócio AI", um especialista sênior em vendas B2B e prospecção da plataforma LODZ.
+Seu objetivo é ajudar o usuário (assinante) a converter seus leads, contornar objeções e escrever respostas no WhatsApp.
+O usuário vai colar mensagens do lead ou pedir dicas.
+Regras de Comportamento:
+1. Seja sempre consultivo, inteligente, prático e focado em conversão.
+2. Fale de forma fluida e conversacional. Use um tom de parceiro de negócios ("sócio").
+3. Quando você for sugerir uma mensagem exata para o usuário enviar ao lead, destaque-a claramente entre aspas para facilitar a cópia.
+4. Responda em Português do Brasil.
+5. Seja direto, sem introduções robóticas do tipo "Olá, sou uma inteligência artificial".`;
 
-  // Analisa intenções / palavras-chave no prompt do usuário
-  const hasCaro = msg.includes('caro') || msg.includes('preço') || msg.includes('valor');
-  const hasReuniao = msg.includes('reunião') || msg.includes('call') || msg.includes('agendar');
-  const hasLeve = msg.includes('leve') || msg.includes('suaviza') || msg.includes('agressivo') || msg.includes('calma');
-  const hasFirme = msg.includes('firme') || msg.includes('direto') || msg.includes('pressão');
-  const hasNaoQuer = msg.includes('não quer') || msg.includes('recusou') || msg.includes('sem interesse');
+const getAI = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenerativeAI(apiKey);
+};
 
-  let aiThought = '';
-  let suggestion = '';
+export async function generateChatResponse(lead, userMessage, chatHistory = []) {
+  try {
+    const ai = getAI();
+    if (!ai) {
+      return {
+        content: "⚠️ **Chave de API não configurada.** Para que eu funcione com o cérebro do Gemini, você precisa adicionar `VITE_GEMINI_API_KEY` no seu arquivo `.env.local` e reiniciar a aplicação."
+      };
+    }
 
-  if (hasCaro) {
-    aiThought = `Entendi. Objeção de preço é comum em ${segment.toLowerCase()}. Como o foco é fechar serviços premium, vamos contornar focando no valor e no retorno sobre o investimento, e não no custo.`;
-    suggestion = `Dr(a), compreendo totalmente a preocupação com o investimento. A grande questão é que focar apenas em pacientes que buscam o serviço mais barato acaba desvalorizando seu tempo. Posso te mostrar rapidamente como nossa estratégia atrai pacientes que valorizam e pagam o preço justo pelo seu trabalho?`;
-  } else if (hasNaoQuer) {
-    aiThought = `Certo. Se ele demonstrou desinteresse, não vamos forçar a barra agora. Vamos deixar a porta aberta de forma elegante, enviando um material de valor que ele possa consumir no tempo dele.`;
-    suggestion = `Sem problemas, ${name}! Entendo que talvez não seja o momento ideal. De qualquer forma, vou deixar aqui um material rápido mostrando como outros negócios da área estão se posicionando. Se um dia fizer sentido, me avisa!`;
-  } else if (hasReuniao) {
-    aiThought = `Ótimo! O lead está aquecido. Vamos ser diretos e já propor duas opções de horários para reduzir a fricção e fechar a reunião.`;
-    suggestion = `Perfeito, ${name}! Acredito que em 10 minutinhos consigo te mostrar na prática como isso vai funcionar para vocês. Como está sua agenda? Prefere amanhã na parte da manhã ou quinta à tarde?`;
-  } else if (hasLeve) {
-    aiThought = `Beleza, vamos tirar o pé do acelerador. Vou criar uma mensagem bem tranquila, sem cara de venda, só para manter a conversa fluindo.`;
-    suggestion = `Entendo, ${name}! Fica tranquilo. A ideia aqui é só compartilhar uma estratégia que achei a cara do seu negócio. Se quiser bater um papo rápido sobre isso depois, me avisa.`;
-  } else if (hasFirme) {
-    aiThought = `Ok, vamos usar uma postura mais consultiva e provocativa para fazer o lead perceber o que está perdendo.`;
-    suggestion = `${name}, respeito sua decisão, mas como acompanho o mercado de ${segment.toLowerCase()}, vejo muito dinheiro sendo deixado na mesa por falta desse tipo de ação. Se você me der 5 minutos, te provo como isso gera resultado prático.`;
-  } else {
-    // Resposta padrão caso nenhuma palavra-chave seja detectada
-    aiThought = `Certo. Para manter a conversa com ${name} produtiva, elaborei uma resposta focada nos próximos passos. O que acha desta abordagem?`;
-    suggestion = `Show, ${name}! Só para eu entender melhor: qual tem sido o maior desafio de vocês hoje em relação a isso? Pergunto porque dependendo do cenário, consigo te dar uma direção mais clara de como resolver.`;
+    const model = ai.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: SOCIO_AI_SYSTEM_PROMPT,
+      generationConfig: { temperature: 0.7 }
+    });
+
+    // Format history for Gemini API (format: { role: 'user' | 'model', parts: [{ text: '...' }] })
+    const formattedHistory = [];
+    
+    for (let i = 0; i < chatHistory.length - 1; i++) {
+      const msg = chatHistory[i];
+      // Skip the very first local generated welcome message
+      if (i === 0 && msg.role === 'ai') continue;
+      
+      formattedHistory.push({
+        role: msg.role === 'ai' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      });
+    }
+
+    const chat = model.startChat({
+      history: formattedHistory,
+    });
+
+    // Inject context on the first interaction
+    let prompt = userMessage;
+    if (chatHistory.length <= 2) {
+      prompt = `[CONTEXTO DO LEAD - Nome: ${lead?.name || 'Desconhecido'} | Segmento: ${lead?.segment || 'Não informado'} | Bio: ${lead?.bio || 'Nenhuma'} | Primeira abordagem que enviamos: ${lead?.personalizedMessage || 'Nenhuma'}]\n\nMensagem do usuário: ${userMessage}`;
+    }
+
+    const result = await chat.sendMessage(prompt);
+    const responseText = result.response.text();
+
+    return {
+      content: responseText
+    };
+
+  } catch (error) {
+    console.error("Erro no Gemini AI:", error);
+    return {
+      content: "Desculpe, ocorreu um erro ao conectar com o servidor da IA. Verifique sua chave de API ou tente novamente."
+    };
   }
-
-  // Modifica um pouco a saída se já houver histórico (dá ideia de continuação)
-  if (chatHistory.length > 2) {
-    aiThought = "Anotado! " + aiThought;
-  }
-
-  return {
-    content: aiThought,
-    suggestion: suggestion
-  };
 }

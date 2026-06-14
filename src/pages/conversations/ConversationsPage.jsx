@@ -61,12 +61,11 @@ export default function ConversationsPage() {
     await new Promise((r) => setTimeout(r, 1000));
 
     // Generate AI chat response
-    const response = generateChatResponse(selectedLead, userMsg, newHistory);
+    const response = await generateChatResponse(selectedLead, userMsg, newHistory);
 
     setChatHistory([...newHistory, {
       role: 'ai',
       content: response.content,
-      suggestion: response.suggestion
     }]);
     
     setGenerating(false);
@@ -268,7 +267,8 @@ export default function ConversationsPage() {
                         borderRadius: msg.role === 'user' ? '12px 0 12px 12px' : '0',
                         color: 'var(--text-primary)',
                         fontSize: '14px',
-                        lineHeight: '1.5'
+                        lineHeight: '1.5',
+                        whiteSpace: 'pre-wrap'
                       }}>
                         {/* Process bold text for AI messages */}
                         {msg.role === 'ai' ? (
@@ -278,30 +278,12 @@ export default function ConversationsPage() {
                         )}
                       </div>
 
-                      {/* AI Suggestion Card */}
-                      {msg.suggestion && (
-                        <div style={{
-                          background: 'var(--bg-card-secondary)',
-                          border: '1px solid var(--border-primary)',
-                          borderRadius: '12px',
-                          padding: '16px',
-                          marginTop: '4px'
-                        }}>
-                          <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--green-primary)', fontWeight: '700', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Sparkles size={12} />
-                            Sugestão de Resposta
-                          </div>
-                          <p style={{ color: 'var(--text-primary)', fontSize: '14px', lineHeight: '1.5', margin: '0 0 16px 0' }}>
-                            {msg.suggestion}
-                          </p>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button className="btn btn-ghost btn-sm" onClick={() => handleCopy(msg.suggestion)}>
-                              <Copy size={14} style={{ marginRight: '6px' }} /> Copiar
-                            </button>
-                            <button className="btn btn-primary btn-sm" onClick={() => handleUseResponse(msg.suggestion, 'Chat AI')}>
-                              <Check size={14} style={{ marginRight: '6px' }} /> Salvar no histórico
-                            </button>
-                          </div>
+                      {/* AI Quick Actions */}
+                      {msg.role === 'ai' && idx > 0 && (
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleCopy(msg.content.replace(/\*\*/g, ''))}>
+                            <Copy size={14} style={{ marginRight: '6px' }} /> Copiar Texto
+                          </button>
                         </div>
                       )}
                     </div>
