@@ -9,8 +9,19 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   
   // Admin Simulation States
-  const [mockPlanId, setMockPlanId] = useState(null);
-  const [isSimulatingUser, setIsSimulatingUser] = useState(false);
+  const [mockPlanId, setMockPlanIdState] = useState(() => localStorage.getItem('lodz_mock_plan') || null);
+  const [isSimulatingUser, setIsSimulatingUserState] = useState(() => localStorage.getItem('lodz_mock_simulating') === 'true');
+
+  const setMockPlanId = (plan) => {
+    setMockPlanIdState(plan);
+    if (plan) localStorage.setItem('lodz_mock_plan', plan);
+    else localStorage.removeItem('lodz_mock_plan');
+  };
+
+  const setIsSimulatingUser = (isSimulating) => {
+    setIsSimulatingUserState(isSimulating);
+    localStorage.setItem('lodz_mock_simulating', isSimulating.toString());
+  };
 
   // Fetch profile from database
   const fetchProfile = useCallback(async (userId) => {

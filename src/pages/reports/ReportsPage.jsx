@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart3, Users, MessageCircle, TrendingUp, Target,
   CheckCircle, XCircle, CreditCard, Sparkles, Filter,
-  Calendar, ChevronRight, AlertTriangle, Zap, Download,
+  Calendar, ChevronRight, AlertTriangle, Zap, Download, Lock,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext.jsx';
 import { useAuth } from '../../contexts/AuthContext.jsx';
@@ -300,16 +300,22 @@ export default function ReportsPage() {
         {canSeeEngajamento ? (
           <KpiCard icon={MessageCircle} label="Engajamento" value={`${taxaResposta}%`} color="var(--color-info)" sub={`${responderam} responderam`} onClick={() => navigate('/conversas')} />
         ) : (
-          <div style={{ position: 'relative', opacity: 0.6, cursor: 'not-allowed' }} onClick={() => { toast.error('Plano incompatível', 'A métrica de Engajamento é exclusiva para o plano GROWTH ou superior. Faça o upgrade!'); navigate('/configuracoes'); }}>
-            <KpiCard icon={MessageCircle} label="Engajamento" value={`--%`} color="var(--text-muted)" sub="Bloqueado no Starter" />
+          <div style={{ position: 'relative', cursor: 'pointer', overflow: 'hidden', borderRadius: '12px' }} onClick={() => { toast.error('Plano incompatível', 'A métrica de Engajamento é exclusiva para o plano GROWTH ou superior. Faça o upgrade!'); navigate('/configuracoes'); }}>
+            <KpiCard icon={MessageCircle} label="Engajamento" value={`--%`} color="var(--text-muted)" sub="Bloqueado" />
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-primary)', background: 'var(--bg-primary)', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-primary)' }}><Lock size={12} /> Exclusivo Plano Growth</span>
+            </div>
           </div>
         )}
 
         {canSeeConversao ? (
           <KpiCard icon={CheckCircle} label="Conversão" value={`${taxaConversao}%`} color="var(--color-success)" sub={`${fechados} vendas fechadas`} onClick={() => navigate('/leads?status=fechado')} />
         ) : (
-          <div style={{ position: 'relative', opacity: 0.6, cursor: 'not-allowed' }} onClick={() => { toast.error('Plano incompatível', 'A métrica de Conversão é exclusiva para o plano GROWTH ou superior. Faça o upgrade!'); navigate('/configuracoes'); }}>
-            <KpiCard icon={CheckCircle} label="Conversão" value={`--%`} color="var(--text-muted)" sub="Bloqueado no Starter" />
+          <div style={{ position: 'relative', cursor: 'pointer', overflow: 'hidden', borderRadius: '12px' }} onClick={() => { toast.error('Plano incompatível', 'A métrica de Conversão é exclusiva para o plano GROWTH ou superior. Faça o upgrade!'); navigate('/configuracoes'); }}>
+            <KpiCard icon={CheckCircle} label="Conversão" value={`--%`} color="var(--text-muted)" sub="Bloqueado" />
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-primary)', background: 'var(--bg-primary)', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-primary)' }}><Lock size={12} /> Exclusivo Plano Growth</span>
+            </div>
           </div>
         )}
 

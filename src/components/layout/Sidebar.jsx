@@ -189,15 +189,17 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
 
         {/* Admin Simulator Widget */}
         {isRealAdmin && !collapsed && (
-          <div style={{
+          <details style={{
             marginTop: '8px', padding: '10px', background: 'var(--bg-hover)', 
-            border: '1px dashed var(--border-primary)', borderRadius: '8px'
+            border: '1px dashed var(--border-primary)', borderRadius: '8px',
+            cursor: 'pointer'
           }}>
-            <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
-              Simulador (Admin)
-            </div>
+            <summary style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', outline: 'none', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Simulador (Admin)</span>
+              <Settings size={12} />
+            </summary>
             
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <label style={{ fontSize: '11px', color: 'var(--text-primary)' }}>Modo Usuário?</label>
               <input 
                 type="checkbox" 
@@ -215,13 +217,14 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
                 background: 'var(--bg-card)', border: '1px solid var(--border-primary)', 
                 borderRadius: '4px', color: 'var(--text-primary)', outline: 'none'
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               <option value="starter">Plano Starter</option>
               <option value="growth">Plano Growth</option>
               <option value="pro">Plano Pro</option>
               <option value="agency">Plano Agency</option>
             </select>
-          </div>
+          </details>
         )}
       </div>
     </aside>
