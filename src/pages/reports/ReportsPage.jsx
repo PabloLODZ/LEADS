@@ -91,8 +91,19 @@ export default function ReportsPage() {
   const toast = useToast();
   const navigate = useNavigate();
 
-  const isStarter = user?.planId === 'starter' && !isAdmin;
+  const planHierarchy = ['starter', 'growth', 'pro', 'agency'];
+  
+  const hasAccess = (requiredPlan) => {
+    if (isAdmin) return true;
+    const userIndex = planHierarchy.indexOf(user?.planId || 'starter');
+    const requiredIndex = planHierarchy.indexOf(requiredPlan);
+    return userIndex >= requiredIndex;
+  };
 
+  const canSeeEngajamento = hasAccess('growth');
+  const canSeeConversao = hasAccess('growth');
+  const canSeeExtrato = hasAccess('growth');
+  const canSeeCampaigns = hasAccess('pro');
   const [period, setPeriod] = useState('30d');
   const [campaignFilter, setCampaignFilter] = useState('todos');
 
@@ -285,8 +296,23 @@ export default function ReportsPage() {
       {/* Main KPIs (4 Clean Cards) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-lg)', marginBottom: 'var(--space-2xl)' }}>
         <KpiCard icon={Users} label="Leads Gerados" value={totalLeads} color="var(--text-primary)" sub={totalLeads > 0 ? `${novos} aguardando contato` : null} onClick={() => navigate('/leads')} />
-        <KpiCard icon={MessageCircle} label="Engajamento" value={`${taxaResposta}%`} color="var(--color-info)" sub={`${responderam} responderam`} onClick={() => navigate('/conversas')} />
-        <KpiCard icon={CheckCircle} label="Conversão" value={`${taxaConversao}%`} color="var(--color-success)" sub={`${fechados} vendas fechadas`} onClick={() => navigate('/leads?status=fechado')} />
+        
+        {canSeeEngajamento ? (
+          <KpiCard icon={MessageCircle} label="Engajamento" value={`${taxaResposta}%`} color="var(--color-info)" sub={`${responderam} responderam`} onClick={() => navigate('/conversas')} />
+        ) : (
+          <div style={{ position: 'relative', opacity: 0.6, cursor: 'not-allowed' }} onClick={() => { toast.error('Plano incompatível', 'A métrica de Engajamento é exclusiva para o plano GROWTH ou superior. Faça o upgrade!'); navigate('/configuracoes'); }}>
+            <KpiCard icon={MessageCircle} label="Engajamento" value={`--%`} color="var(--text-muted)" sub="Bloqueado no Starter" />
+          </div>
+        )}
+
+        {canSeeConversao ? (
+          <KpiCard icon={CheckCircle} label="Conversão" value={`${taxaConversao}%`} color="var(--color-success)" sub={`${fechados} vendas fechadas`} onClick={() => navigate('/leads?status=fechado')} />
+        ) : (
+          <div style={{ position: 'relative', opacity: 0.6, cursor: 'not-allowed' }} onClick={() => { toast.error('Plano incompatível', 'A métrica de Conversão é exclusiva para o plano GROWTH ou superior. Faça o upgrade!'); navigate('/configuracoes'); }}>
+            <KpiCard icon={CheckCircle} label="Conversão" value={`--%`} color="var(--text-muted)" sub="Bloqueado no Starter" />
+          </div>
+        )}
+
         <KpiCard icon={Zap} label="Créditos Usados" value={creditosConsumidos} color="var(--color-warning)" onClick={() => navigate('/configuracoes')} />
       </div>
 
@@ -294,12 +320,20 @@ export default function ReportsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--space-xl)' }}>
 
         {/* Funil de conversão */}
-        <div className="card">
+        <div className="card" style={{ position: 'relative' }}>
           <h3 style={{ fontWeight: '700', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <BarChart3 size={18} color="var(--green-primary)" />
             Funil de Conversão
           </h3>
-          {totalLeads === 0 ? (
+          
+          {!canSeeConversao ? (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--color-warning)' }}>
+              <Sparkles size={24} style={{ color: 'var(--color-warning)', marginBottom: '8px' }} />
+              <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>Funil Avançado</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Exclusivo do plano Growth</div>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate('/configuracoes')}>Fazer Upgrade</button>
+            </div>
+          ) : totalLeads === 0 ? (
             <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Nenhum lead no período selecionado.</p>
           ) : (
             <>
@@ -314,12 +348,20 @@ export default function ReportsPage() {
         </div>
 
         {/* Performance por campanha */}
-        <div className="card">
+        <div className="card" style={{ position: 'relative' }}>
           <h3 style={{ fontWeight: '700', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Target size={18} color="var(--green-primary)" />
             Performance por Campanha
           </h3>
-          {campaignStats.length === 0 ? (
+          
+          {!canSeeCampaigns ? (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--color-info)' }}>
+              <Target size={24} style={{ color: 'var(--color-info)', marginBottom: '8px' }} />
+              <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>Métricas de Campanhas</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Exclusivo do plano Pro</div>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate('/configuracoes')}>Fazer Upgrade</button>
+            </div>
+          ) : campaignStats.length === 0 ? (
             <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Nenhuma campanha com leads no período.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -351,7 +393,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Créditos - Extrato simplificado */}
-        <div className="card">
+        <div className="card" style={{ position: 'relative' }}>
           <h3 style={{ fontWeight: '700', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CreditCard size={18} color="var(--green-primary)" />
             Extrato de Créditos
@@ -359,7 +401,15 @@ export default function ReportsPage() {
               Saldo: {getTotalCredits(user?.creditWallet)}
             </span>
           </h3>
-          {filteredTx.length === 0 ? (
+          
+          {!canSeeExtrato ? (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--green-primary)' }}>
+              <CreditCard size={24} style={{ color: 'var(--green-primary)', marginBottom: '8px' }} />
+              <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>Extrato Detalhado</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Exclusivo do plano Growth</div>
+              <button className="btn btn-primary btn-sm" onClick={() => navigate('/configuracoes')}>Fazer Upgrade</button>
+            </div>
+          ) : filteredTx.length === 0 ? (
             <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Nenhuma transação no período.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
