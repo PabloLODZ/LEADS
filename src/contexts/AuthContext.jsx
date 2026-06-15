@@ -7,6 +7,10 @@ export function AuthProvider({ children }) {
   const [authUser, setAuthUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Admin Simulation States
+  const [mockPlanId, setMockPlanId] = useState(null);
+  const [isSimulatingUser, setIsSimulatingUser] = useState(false);
 
   // Fetch profile from database
   const fetchProfile = useCallback(async (userId) => {
@@ -210,7 +214,8 @@ export function AuthProvider({ children }) {
     email: authUser?.email || '',
     avatarUrl: profile.avatar_url,
     role: profile.role,
-    planId: profile.plan_id,
+    planId: mockPlanId || profile.plan_id,
+    realPlanId: profile.plan_id,
     subscriptionStatus: profile.subscription_status,
     stripeCustomerId: profile.stripe_customer_id,
     whatsappPhone: profile.whatsapp_phone || '',
@@ -224,7 +229,8 @@ export function AuthProvider({ children }) {
     updatedAt: profile.updated_at,
   } : null;
 
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = profile?.role === 'admin' && !isSimulatingUser;
+  const isRealAdmin = profile?.role === 'admin';
   const isAuthenticated = !!authUser && !!profile;
 
   return (
@@ -233,6 +239,11 @@ export function AuthProvider({ children }) {
       isLoading,
       isAuthenticated,
       isAdmin,
+      isRealAdmin,
+      mockPlanId,
+      setMockPlanId,
+      isSimulatingUser,
+      setIsSimulatingUser,
       login,
       register,
       logout,

@@ -27,7 +27,7 @@ import { getInitials } from '../../utils/formatters.js';
 import { getPlanById } from '../../data/plans.js';
 
 export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCredits }) {
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, isRealAdmin, mockPlanId, setMockPlanId, isSimulatingUser, setIsSimulatingUser, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { leads } = useApp();
   const navigate = useNavigate();
@@ -186,6 +186,43 @@ export default function Sidebar({ collapsed, onToggle, onFeedbackClick, onBuyCre
             </div>
           )}
         </div>
+
+        {/* Admin Simulator Widget */}
+        {isRealAdmin && !collapsed && (
+          <div style={{
+            marginTop: '8px', padding: '10px', background: 'var(--bg-hover)', 
+            border: '1px dashed var(--border-primary)', borderRadius: '8px'
+          }}>
+            <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
+              Simulador (Admin)
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <label style={{ fontSize: '11px', color: 'var(--text-primary)' }}>Modo Usuário?</label>
+              <input 
+                type="checkbox" 
+                checked={isSimulatingUser} 
+                onChange={(e) => setIsSimulatingUser(e.target.checked)} 
+                style={{ cursor: 'pointer' }}
+              />
+            </div>
+
+            <select 
+              value={mockPlanId || user?.realPlanId || 'starter'}
+              onChange={(e) => setMockPlanId(e.target.value)}
+              style={{
+                width: '100%', padding: '4px 6px', fontSize: '11px', 
+                background: 'var(--bg-card)', border: '1px solid var(--border-primary)', 
+                borderRadius: '4px', color: 'var(--text-primary)', outline: 'none'
+              }}
+            >
+              <option value="starter">Plano Starter</option>
+              <option value="growth">Plano Growth</option>
+              <option value="pro">Plano Pro</option>
+              <option value="agency">Plano Agency</option>
+            </select>
+          </div>
+        )}
       </div>
     </aside>
   );

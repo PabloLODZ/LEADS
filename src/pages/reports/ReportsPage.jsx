@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart3, Users, MessageCircle, TrendingUp, Target,
   CheckCircle, XCircle, CreditCard, Sparkles, Filter,
-  Calendar, ChevronRight, AlertTriangle, Zap,
+  Calendar, ChevronRight, AlertTriangle, Zap, Download,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext.jsx';
 import { useAuth } from '../../contexts/AuthContext.jsx';
+import { useToast } from '../../contexts/ToastContext.jsx';
 import { getTotalCredits } from '../../utils/creditEngine.js';
 import { formatDate } from '../../utils/formatters.js';
 
@@ -86,7 +87,8 @@ function MiniBar({ label, value, maxValue, color }) {
 
 export default function ReportsPage() {
   const { leads, campaigns, creditTransactions, interactions } = useApp();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isRealAdmin } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
 
   const isStarter = user?.planId === 'starter' && !isAdmin;
@@ -146,6 +148,34 @@ export default function ReportsPage() {
 
   const maxCampLeads = Math.max(...campaignStats.map(c => c.totalLeads), 1);
 
+  const handleExportCSV = () => {
+    if (user?.planId === 'starter' || user?.planId === 'growth') {
+      if (!isRealAdmin && !isAdmin) {
+        toast.error('Plano incompatível', 'A exportação de dados é exclusiva para planos PRO e AGENCY. Faça o upgrade nas configurações!');
+        return;
+      }
+    }
+    
+    const headers = ['Nome,Email,Telefone,Status,Campanha,Data Criacao'];
+    const rows = filteredLeads.map(l => {
+      const campName = campaigns.find(c => c.id === l.campaignId)?.name || '';
+      const date = new Date(l.createdAt).toLocaleDateString();
+      return `"${l.name}","${l.email || ''}","${l.phone || ''}","${l.status}","${campName}","${date}"`;
+    });
+    
+    const csvContent = headers.concat(rows).join('\\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `relatorio_lodz_${period}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Download iniciado!', 'Seu relatório CSV está sendo baixado.');
+  };
+
   // Insights
   const leadsAtrasados = leads.filter(l => {
     if (!l.lastInteractionAt || ['fechado', 'perdido'].includes(l.status)) return false;
@@ -160,11 +190,15 @@ export default function ReportsPage() {
   return (
     <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>
       {/* Header */}
-      <div className="page-header" style={{ marginBottom: 'var(--space-xl)' }}>
+      <div className="page-header" style={{ marginBottom: 'var(--space-xl)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h1 className="page-title">Relatórios</h1>
           <p className="page-subtitle">Visão geral da sua performance de prospecção</p>
         </div>
+        <button className="btn btn-secondary" onClick={handleExportCSV}>
+          <Download size={16} style={{ marginRight: '8px' }} />
+          Exportar Relatório
+        </button>
       </div>
 
       {/* Filters */}
@@ -248,60 +282,13 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {/* KPI Grid */}
-      <div className="stats-grid" style={{ marginBottom: 'var(--space-2xl)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-lg)' }}>
-        <KpiCard
-          icon={Users}
-          label="Leads Gerados"
-          value={totalLeads}
-          color="var(--text-primary)"
-          onClick={() => navigate('/leads')}
-        />
-        <KpiCard
-          icon={Target}
-          label="Abordados"
-          value={abordados}
-          color="var(--color-info)"
-          onClick={() => navigate(`/leads?status=contactado`)}
-        />
-        <KpiCard
-          icon={MessageCircle}
-          label="Respostas"
-          value={responderam}
-          color="var(--color-warning)"
-          sub={`${taxaResposta}% de conversão`}
-          onClick={() => navigate(`/leads?status=respondeu`)}
-        />
-        <KpiCard
-          icon={CheckCircle}
-          label="Fechados (Ganho)"
-          value={fechados}
-          color="var(--green-primary)"
-          sub={`${taxaConversao}% win rate global`}
-          onClick={() => navigate(`/leads?status=fechado`)}
-        />
+      {/* Main KPIs (4 Clean Cards) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-lg)', marginBottom: 'var(--space-2xl)' }}>
+        <KpiCard icon={Users} label="Leads Gerados" value={totalLeads} color="var(--text-primary)" sub={totalLeads > 0 ? `${novos} aguardando contato` : null} onClick={() => navigate('/leads')} />
+        <KpiCard icon={MessageCircle} label="Engajamento" value={`${taxaResposta}%`} color="var(--color-info)" sub={`${responderam} responderam`} onClick={() => navigate('/conversas')} />
+        <KpiCard icon={CheckCircle} label="Conversão" value={`${taxaConversao}%`} color="var(--color-success)" sub={`${fechados} vendas fechadas`} onClick={() => navigate('/leads?status=fechado')} />
+        <KpiCard icon={Zap} label="Créditos Usados" value={creditosConsumidos} color="var(--color-warning)" onClick={() => navigate('/configuracoes')} />
       </div>
-
-      {isStarter ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center', background: 'linear-gradient(180deg, var(--bg-card) 0%, var(--bg-primary) 100%)', border: '1px solid var(--border-primary)', borderRadius: '16px', position: 'relative', overflow: 'hidden', marginBottom: '24px' }}>
-          <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '200px', height: '200px', background: 'radial-gradient(circle, rgba(0,200,90,0.1) 0%, rgba(0,0,0,0) 70%)' }}></div>
-          <Sparkles size={40} style={{ color: 'var(--color-warning)', marginBottom: '16px' }} />
-          <h3 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>Desbloqueie Relatórios Avançados</h3>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '420px', marginBottom: '24px', fontSize: '14px', lineHeight: '1.5' }}>
-            Faça upgrade para Growth ou superior para acessar métricas avançadas, performance de campanhas, motivos de perda e exportações de dados.
-          </p>
-          <button className="btn btn-primary" onClick={() => navigate('/configuracoes')} style={{ background: 'var(--color-warning)', color: 'var(--bg-primary)', border: 'none', padding: '10px 24px', fontWeight: '600' }}>Fazer Upgrade para Pro</button>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--space-xl)', marginBottom: 'var(--space-2xl)' }}>
-          <KpiCard icon={TrendingUp} label="Responderam" value={responderam} color="var(--color-info)" sub={`${taxaResposta}% de resposta`} />
-          <KpiCard icon={BarChart3} label="Em Negociação" value={negociacao} color="var(--color-warning)" />
-          <KpiCard icon={CheckCircle} label="Fechados" value={fechados} color="var(--color-success)" sub={`${taxaConversao}% de conversão`} onClick={() => navigate('/leads?status=fechado')} />
-          <KpiCard icon={XCircle} label="Perdidos" value={perdidos} color="var(--color-error)" onClick={() => navigate('/leads?status=perdido')} />
-          <KpiCard icon={CreditCard} label="Créditos usados" value={creditosConsumidos} color="var(--color-warning)" />
-          <KpiCard icon={Sparkles} label="Mensagens IA" value={mensagensIA} color="var(--green-primary)" />
-        </div>
-      )}
 
       {/* Bottom Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--space-xl)' }}>
