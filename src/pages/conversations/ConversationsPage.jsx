@@ -156,7 +156,8 @@ export default function ConversationsPage() {
 
   useEffect(() => {
     if (selectedLead && chatHistory.length > 0) {
-      localStorage.setItem(`chatHistory_${selectedLead.id}`, JSON.stringify(chatHistory));
+      const historyToSave = chatHistory.map(msg => ({ ...msg, isNew: false }));
+      localStorage.setItem(`chatHistory_${selectedLead.id}`, JSON.stringify(historyToSave));
     }
   }, [chatHistory, selectedLead]);
 
