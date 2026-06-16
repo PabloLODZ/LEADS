@@ -41,7 +41,7 @@ function TypewriterText({ text, speed = 15 }) {
 
 export default function ConversationsPage() {
   const { leads, campaigns, addInteraction, updateLeadStatus } = useApp();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, updateUser } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
