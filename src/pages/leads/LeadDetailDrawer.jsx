@@ -143,9 +143,7 @@ export default function LeadDetailDrawer({ lead, isOpen, onClose }) {
   // Status transition buttons (excluding current status and 'descartado')
   const statusButtons = [
     { value: 'contactado', label: 'Contactado', icon: <Send size={13} /> },
-    { value: 'follow_up', label: 'Follow-up', icon: <Clock size={13} /> },
     { value: 'respondeu', label: 'Respondeu', icon: <MessageCircle size={13} /> },
-    { value: 'qualificado', label: 'Qualificado', icon: <TrendingUp size={13} /> },
     { value: 'negociacao', label: 'Em Negociação', icon: <Handshake size={13} /> },
     { value: 'fechado', label: 'Fechado ✓', icon: <Check size={13} />, primary: true },
     { value: 'perdido', label: 'Perdido', icon: <XCircle size={13} />, danger: true },

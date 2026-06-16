@@ -20,6 +20,25 @@ import { useToast } from '../../contexts/ToastContext.jsx';
 import { getInitials, getStatusColor, getStatusLabel } from '../../utils/formatters.js';
 import { generateChatResponse } from '../../utils/messageGenerator.js';
 
+function TypewriterText({ text, speed = 15 }) {
+  const [displayedText, setDisplayedText] = useState('');
+
+  useEffect(() => {
+    let i = 0;
+    setDisplayedText('');
+    const interval = setInterval(() => {
+      setDisplayedText(text.substring(0, i + 1));
+      i++;
+      if (i >= text.length) {
+        clearInterval(interval);
+      }
+    }, speed);
+    return () => clearInterval(interval);
+  }, [text, speed]);
+
+  return <span style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>{displayedText}</span>;
+}
+
 export default function ConversationsPage() {
   const { leads, campaigns, addInteraction, updateLeadStatus } = useApp();
   const { user, isAdmin } = useAuth();
@@ -92,12 +111,23 @@ export default function ConversationsPage() {
     setChatHistory(newHistory);
     setGenerating(true);
 
-    const response = await generateChatResponse(selectedLead, userMsg, newHistory);
+    const response = await generateChatResponse(selectedLead, userMsg, newHistory, user?.planId);
 
     setChatHistory([...newHistory, {
       role: 'ai',
       content: response.content,
+      isNew: true
     }]);
+
+    if (!isAdmin) {
+      const newBase = Math.max(0, (user.creditWallet?.baseCredits || 0) - 1);
+      updateUser({
+        creditWallet: {
+          ...user.creditWallet,
+          baseCredits: newBase
+        }
+      });
+    }
     
     setGenerating(false);
   };
@@ -144,12 +174,25 @@ export default function ConversationsPage() {
     await new Promise((r) => setTimeout(r, 1000));
 
     // Generate AI chat response
-    const response = await generateChatResponse(selectedLead, userMsg, newHistory);
+    const response = await generateChatResponse(selectedLead, userMsg, newHistory, user?.planId);
 
     setChatHistory([...newHistory, {
       role: 'ai',
       content: response.content,
+      isNew: true
     }]);
+
+    // Handle credit deduction roughly on client
+    if (!isAdmin) {
+      const newBase = Math.max(0, (user.creditWallet?.baseCredits || 0) - 1);
+      updateUser({
+        creditWallet: {
+          ...user.creditWallet,
+          baseCredits: newBase
+        }
+      });
+      // Optionally create a transaction in local state
+    }
     
     setGenerating(false);
   };
@@ -199,7 +242,7 @@ export default function ConversationsPage() {
             <div style={{ color: 'var(--green-primary)' }}>
               <Bot size={24} />
             </div>
-            <span style={{ fontWeight: '600', fontSize: '16px', color: 'var(--text-primary)' }}>Sócio AI</span>
+            <span style={{ fontWeight: '600', fontSize: '16px', color: 'var(--text-primary)' }}>IA Especialista</span>
           </div>
           {respondeuCount > 0 && (
             <span style={{ background: 'var(--green-dark)', color: 'var(--green-primary)', fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '12px' }}>{respondeuCount} novos</span>
@@ -343,21 +386,26 @@ export default function ConversationsPage() {
 
                     {/* Bubble */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{
-                        background: msg.role === 'user' ? 'var(--bg-card)' : 'transparent',
-                        border: msg.role === 'user' ? '1px solid var(--border-primary)' : 'none',
-                        padding: msg.role === 'user' ? '12px 16px' : '0',
-                        borderRadius: msg.role === 'user' ? '12px 0 12px 12px' : '0',
-                        color: 'var(--text-primary)',
+                      <div style={{ 
+                        background: msg.role === 'user' ? 'var(--green-dark)' : 'var(--bg-card)', 
+                        color: msg.role === 'user' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        border: msg.role === 'user' ? '1px solid var(--green-primary)' : '1px solid var(--border-primary)',
+                        maxWidth: '100%',
                         fontSize: '14px',
-                        lineHeight: '1.5',
-                        whiteSpace: 'pre-wrap'
+                        lineHeight: '1.6'
                       }}>
-                        {/* Process bold text for AI messages */}
-                        {msg.role === 'ai' ? (
-                          <div dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                        {msg.role === 'ai' && msg.isNew ? (
+                          <TypewriterText text={msg.content} />
                         ) : (
-                          msg.content
+                          <span style={{ whiteSpace: 'pre-wrap' }}>
+                            {msg.role === 'ai' ? (
+                              <span dangerouslySetInnerHTML={{ __html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                            ) : (
+                              msg.content
+                            )}
+                          </span>
                         )}
                       </div>
 
@@ -407,7 +455,7 @@ export default function ConversationsPage() {
                 </button>
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '8px' }}>
-                O Sócio AI pode cometer erros. Revise a mensagem antes de enviar para o lead.
+                A IA Especialista consome 1 crédito por mensagem e pode cometer erros. Revise antes de enviar para o lead.
               </div>
             </div>
           </>
@@ -421,7 +469,7 @@ export default function ConversationsPage() {
               Selecione uma conversa
             </h2>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '420px', fontSize: '14px', lineHeight: '1.5' }}>
-              Escolha um lead na barra lateral para gerar respostas inteligentes com o Sócio AI baseadas no histórico da campanha.
+              Escolha um lead na barra lateral para gerar respostas inteligentes com a IA Especialista em Vendas baseadas no histórico da campanha.
             </p>
           </div>
         )}

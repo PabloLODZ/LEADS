@@ -151,9 +151,7 @@ export default function LeadsPage() {
     todos: totalCount,
     novo: leads.filter((l) => l.status === 'novo').length,
     contactado: leads.filter((l) => l.status === 'contactado').length,
-    follow_up: leads.filter((l) => l.status === 'follow_up').length,
     respondeu: leads.filter((l) => l.status === 'respondeu').length,
-    qualificado: leads.filter((l) => l.status === 'qualificado').length,
     negociacao: leads.filter((l) => l.status === 'negociacao').length,
     fechado: leads.filter((l) => l.status === 'fechado').length,
     perdido: leads.filter((l) => l.status === 'perdido').length,
@@ -163,15 +161,13 @@ export default function LeadsPage() {
     { value: 'todos', label: 'Todos' },
     { value: 'novo', label: 'Novo' },
     { value: 'contactado', label: 'Contactado' },
-    { value: 'follow_up', label: 'Follow-up' },
     { value: 'respondeu', label: 'Respondeu' },
-    { value: 'qualificado', label: 'Qualificado' },
     { value: 'negociacao', label: 'Negociação' },
     { value: 'fechado', label: 'Fechado' },
     { value: 'perdido', label: 'Perdido' },
   ];
 
-  const kanbanColumns = ['novo', 'contactado', 'follow_up', 'respondeu', 'qualificado', 'negociacao', 'fechado'];
+  const kanbanColumns = ['novo', 'contactado', 'respondeu', 'negociacao', 'fechado'];
 
   return (
     <div className="page-container" style={{ padding: 'var(--space-2xl)' }}>

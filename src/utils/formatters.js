@@ -81,9 +81,7 @@ export function getStatusColor(status) {
   const map = {
     'novo': 'blue',
     'contactado': 'yellow',
-    'follow_up': 'yellow',
     'respondeu': 'green',
-    'qualificado': 'green',
     'negociacao': 'purple',
     'fechado': 'green',
     'perdido': 'red',
@@ -109,9 +107,7 @@ export function getStatusLabel(status) {
   const map = {
     'novo': 'Novo',
     'contactado': 'Contactado',
-    'follow_up': 'Follow-up',
     'respondeu': 'Respondeu',
-    'qualificado': 'Qualificado',
     'negociacao': 'Em Negociação',
     'fechado': 'Fechado',
     'perdido': 'Perdido',
@@ -128,9 +124,7 @@ export function getStatusLabel(status) {
 export const LEAD_STATUSES = [
   { value: 'novo', label: 'Novo', color: 'blue' },
   { value: 'contactado', label: 'Contactado', color: 'yellow' },
-  { value: 'follow_up', label: 'Follow-up', color: 'yellow' },
   { value: 'respondeu', label: 'Respondeu', color: 'green' },
-  { value: 'qualificado', label: 'Qualificado', color: 'green' },
   { value: 'negociacao', label: 'Em Negociação', color: 'purple' },
   { value: 'fechado', label: 'Fechado', color: 'green' },
   { value: 'perdido', label: 'Perdido', color: 'red' },

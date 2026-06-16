@@ -446,10 +446,10 @@ export function AppProvider({ children }) {
 
         const counters = {
           contactedLeads: campaignLeads.filter(l =>
-            ['contactado', 'follow_up', 'respondeu', 'qualificado', 'negociacao', 'fechado', 'perdido'].includes(l.status)
+            ['contactado', 'respondeu', 'negociacao', 'fechado', 'perdido'].includes(l.status)
           ).length,
           respondedLeads: campaignLeads.filter(l =>
-            ['respondeu', 'qualificado', 'negociacao', 'fechado'].includes(l.status)
+            ['respondeu', 'negociacao', 'fechado'].includes(l.status)
           ).length,
           closedLeads: campaignLeads.filter(l => l.status === 'fechado').length,
         };

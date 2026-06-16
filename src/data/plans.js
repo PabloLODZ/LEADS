@@ -8,7 +8,7 @@ export const PLANS = [
     features: [
       '50 créditos / mês',
       '1 Campanha Ativa',
-      'Sócio IA: Básico',
+      'IA Especialista em Vendas: Básico',
       'Relatórios: Bloqueado',
       'Exportação CSV: Bloqueado',
     ],
@@ -24,7 +24,7 @@ export const PLANS = [
     features: [
       '120 créditos / mês',
       '3 Campanhas Ativas',
-      'Sócio IA: Tons de Voz',
+      'IA Especialista em Vendas: Tons de Voz',
       'Relatórios: Parcial',
       'Exportação CSV: Bloqueado',
     ],
@@ -41,7 +41,7 @@ export const PLANS = [
     features: [
       '300 créditos / mês',
       '10 Campanhas Ativas',
-      'Sócio IA: Customizável',
+      'IA Especialista em Vendas: Customizável',
       'Relatórios: Completos',
       'Exportação CSV: Liberado',
     ],
@@ -57,7 +57,7 @@ export const PLANS = [
     features: [
       '750 créditos / mês',
       'Campanhas Ilimitadas',
-      'Sócio IA: VIP',
+      'IA Especialista em Vendas: VIP',
       'Tudo Liberado',
       'Gerente de Contas',
     ],

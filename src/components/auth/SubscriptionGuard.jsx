@@ -53,7 +53,7 @@ export default function SubscriptionGuard({ children }) {
               {user.subscriptionStatus === 'cancelled' ? 'Sua assinatura está inativa' : 'Escolha seu plano para começar'}
             </h1>
             <p style={{ fontSize: '16px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
-              Para acessar o CRM, gerar leads qualificados e usar o nosso Sócio IA, você precisa ter uma assinatura ativa. Escolha o plano que melhor se adapta à sua operação.
+              Para acessar o CRM, gerar leads qualificados e usar a nossa IA Especialista em Vendas, você precisa ter uma assinatura ativa. Escolha o plano que melhor se adapta à sua operação.
             </p>
           </div>
 

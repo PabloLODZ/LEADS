@@ -302,7 +302,7 @@ export default function ReportsPage() {
         ) : (
           <div style={{ position: 'relative', cursor: 'pointer', overflow: 'hidden', borderRadius: '12px' }} onClick={() => { toast.error('Plano incompatível', 'A métrica de Engajamento é exclusiva para o plano GROWTH ou superior. Faça o upgrade!'); navigate('/configuracoes'); }}>
             <KpiCard icon={MessageCircle} label="Engajamento" value={`--%`} color="var(--text-muted)" sub="Bloqueado" />
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-overlay)', backdropFilter: 'blur(2px)' }}>
               <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-primary)', background: 'var(--bg-primary)', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-primary)' }}><Lock size={12} /> Exclusivo Plano Growth</span>
             </div>
           </div>
@@ -313,7 +313,7 @@ export default function ReportsPage() {
         ) : (
           <div style={{ position: 'relative', cursor: 'pointer', overflow: 'hidden', borderRadius: '12px' }} onClick={() => { toast.error('Plano incompatível', 'A métrica de Conversão é exclusiva para o plano GROWTH ou superior. Faça o upgrade!'); navigate('/configuracoes'); }}>
             <KpiCard icon={CheckCircle} label="Conversão" value={`--%`} color="var(--text-muted)" sub="Bloqueado" />
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-overlay)', backdropFilter: 'blur(2px)' }}>
               <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-primary)', background: 'var(--bg-primary)', padding: '6px 10px', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid var(--border-primary)' }}><Lock size={12} /> Exclusivo Plano Growth</span>
             </div>
           </div>
@@ -326,14 +326,14 @@ export default function ReportsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--space-xl)' }}>
 
         {/* Funil de conversão */}
-        <div className="card" style={{ position: 'relative' }}>
+        <div className="card" style={{ position: 'relative', minHeight: '220px' }}>
           <h3 style={{ fontWeight: '700', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <BarChart3 size={18} color="var(--green-primary)" />
             Funil de Conversão
           </h3>
           
           {!canSeeConversao ? (
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--color-warning)' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-overlay)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--color-warning)' }}>
               <Sparkles size={24} style={{ color: 'var(--color-warning)', marginBottom: '8px' }} />
               <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>Funil Avançado</div>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Exclusivo do plano Growth</div>
@@ -354,14 +354,14 @@ export default function ReportsPage() {
         </div>
 
         {/* Performance por campanha */}
-        <div className="card" style={{ position: 'relative' }}>
+        <div className="card" style={{ position: 'relative', minHeight: '220px' }}>
           <h3 style={{ fontWeight: '700', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Target size={18} color="var(--green-primary)" />
             Performance por Campanha
           </h3>
           
           {!canSeeCampaigns ? (
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--color-info)' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-overlay)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--color-info)' }}>
               <Target size={24} style={{ color: 'var(--color-info)', marginBottom: '8px' }} />
               <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>Métricas de Campanhas</div>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Exclusivo do plano Pro</div>
@@ -399,7 +399,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Créditos - Extrato simplificado */}
-        <div className="card" style={{ position: 'relative' }}>
+        <div className="card" style={{ position: 'relative', minHeight: '220px' }}>
           <h3 style={{ fontWeight: '700', marginBottom: 'var(--space-lg)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CreditCard size={18} color="var(--green-primary)" />
             Extrato de Créditos
@@ -409,7 +409,7 @@ export default function ReportsPage() {
           </h3>
           
           {!canSeeExtrato ? (
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--green-primary)' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-overlay)', backdropFilter: 'blur(4px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', zIndex: 10, border: '1px dashed var(--green-primary)' }}>
               <CreditCard size={24} style={{ color: 'var(--green-primary)', marginBottom: '8px' }} />
               <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>Extrato Detalhado</div>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Exclusivo do plano Growth</div>

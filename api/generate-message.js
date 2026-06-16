@@ -56,6 +56,7 @@ ${campaignContext}
 TIPO DE MENSAGEM: ${MESSAGE_TYPES[messageType]}
 INSTRUÇÃO ESPECÍFICA: ${typeInstructions[messageType]}
 ${customInstruction ? `INSTRUÇÃO ADICIONAL DO VENDEDOR: ${customInstruction}` : ''}
+${(campaign?.planId === 'pro' || campaign?.planId === 'agency') ? '\nINSTRUÇÃO AVANÇADA DE VENDAS (PNL): Aplique gatilhos mentais sutis como escassez ou prova social. Use tom altamente persuasivo, espelhando a comunicação do lead para gerar rapport imediato. Foque em conversão rápida e dor latente.' : ''}
 
 REGRAS OBRIGATÓRIAS:
 - NÃO use frases genéricas como "espero que esteja bem" ou "tudo bem?"
@@ -118,23 +119,52 @@ export default async function handler(req, res) {
     const result = await model.generateContent(prompt);
     const generatedMessage = result.response.text().trim();
 
-    // Log the AI generation in credit_transactions (cost: 0 credits for AI messages)
-    // This is just a log — the lead generation already consumed credits
-    await supabase.from('credit_transactions').insert({
+    // Determine credit cost
+    const cost = isAdmin ? 0 : 1;
+    let newBase = profile.base_credits || 0;
+    let newPurchased = profile.purchased_credits || 0;
+
+    if (!isAdmin) {
+      const available = newBase + newPurchased;
+      if (available < cost) {
+        return res.status(403).json({ error: 'Créditos insuficientes para gerar a mensagem com IA.' });
+      }
+      
+      let remaining = cost;
+      const fromBase = Math.min(remaining, newBase);
+      newBase -= fromBase;
+      remaining -= fromBase;
+      
+      if (remaining > 0) {
+        newPurchased -= remaining;
+      }
+
+      await supabase.from('profiles').update({
+        base_credits: newBase,
+        purchased_credits: newPurchased,
+      }).eq('id', userId);
+    }
+
+    // Log the AI generation in credit_transactions
+    const transaction = {
       user_id: userId,
       type: 'ai_message_generated',
-      amount: 0,
+      amount: -cost,
       balance_before: (profile.base_credits || 0) + (profile.purchased_credits || 0),
-      balance_after: (profile.base_credits || 0) + (profile.purchased_credits || 0),
-      reason: `Mensagem IA gerada: ${MESSAGE_TYPES[messageType]} para "${lead.name}"`,
+      balance_after: newBase + newPurchased,
+      reason: `IA Especialista: ${MESSAGE_TYPES[messageType]} para "${lead.name}"`,
       description: `Tipo: ${messageType} | Lead: ${lead.name} | ${new Date().toLocaleDateString('pt-BR')}`,
-    });
+    };
+
+    const { data: txData } = await supabase.from('credit_transactions').insert(transaction).select().single();
 
     return res.status(200).json({
       message: generatedMessage,
       messageType,
       messageTypeLabel: MESSAGE_TYPES[messageType],
       leadName: lead.name,
+      credits: { base_credits: newBase, purchased_credits: newPurchased },
+      transaction: txData
     });
 
   } catch (err) {

@@ -16,7 +16,7 @@ import {
 const TABS = [
   { id: 'respondeu', label: 'Responderam', icon: MessageCircle, color: 'var(--color-success)', urgent: true },
   { id: 'novo',      label: 'Para abordar', icon: TrendingUp,   color: 'var(--color-info)' },
-  { id: 'follow_up', label: 'Follow-up',    icon: Clock,        color: 'var(--color-warning)' },
+  { id: 'contactado',label: 'Aguardando',   icon: Clock,        color: 'var(--color-warning)' },
   { id: 'atrasados', label: 'Atrasados',    icon: AlertTriangle,color: 'var(--color-error)' },
 ];
 
@@ -42,9 +42,9 @@ export default function TodayPage() {
   const queues = {
     respondeu: leads.filter(l => l.status === 'respondeu'),
     novo:      leads.filter(l => l.status === 'novo'),
-    follow_up: leads.filter(l => l.status === 'follow_up'),
+    contactado:leads.filter(l => l.status === 'contactado'),
     atrasados: leads.filter(l =>
-      ['contactado', 'follow_up'].includes(l.status) &&
+      l.status === 'contactado' &&
       l.updatedAt && new Date(l.updatedAt) < twoDaysAgo
     ),
   };
@@ -155,22 +155,22 @@ export default function TodayPage() {
             <button
               className="btn btn-sm btn-primary"
               style={{ padding: '6px' }}
-              disabled={busy('follow_up')}
-              onClick={() => markStatus(lead, 'follow_up', 'Follow-up')}
-              title="Agendar retorno"
+              disabled={busy('negociacao')}
+              onClick={() => markStatus(lead, 'negociacao', 'Em Negociação')}
+              title="Iniciar Negociação"
             >
-              <Calendar size={16} />
+              <Target size={16} />
             </button>
           )}
 
-          {tab === 'follow_up' && (
-            <button className="btn btn-sm btn-ghost" style={{ padding: '6px', color: 'var(--color-success)' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')} title="Novo FUP">
-              <Check size={16} />
+          {tab === 'contactado' && (
+            <button className="btn btn-sm btn-ghost" style={{ padding: '6px', color: 'var(--color-success)' }} disabled={busy('_cont')} onClick={() => navigate(`/conversas`)} title="Ver Conversa">
+              <MessageCircle size={16} />
             </button>
           )}
 
           {tab === 'atrasados' && (
-            <button className="btn btn-sm btn-ghost" style={{ padding: '6px', color: 'var(--color-success)' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')} title="FUP">
+            <button className="btn btn-sm btn-ghost" style={{ padding: '6px', color: 'var(--color-success)' }} disabled={busy('_cont')} onClick={() => markStatus(lead, 'contactado', 'Contactado')} title="Marcar como abordado novamente">
               <Check size={16} />
             </button>
           )}

@@ -216,7 +216,7 @@ const getAI = () => {
   return new Groq({ apiKey, dangerouslyAllowBrowser: true });
 };
 
-export async function generateChatResponse(lead, userMessage, chatHistory = []) {
+export async function generateChatResponse(lead, userMessage, chatHistory = [], planId = 'starter') {
   try {
     const ai = getAI();
     if (!ai) {
@@ -225,8 +225,13 @@ export async function generateChatResponse(lead, userMessage, chatHistory = []) 
       };
     }
 
+    let systemPrompt = SOCIO_AI_SYSTEM_PROMPT;
+    if (planId === 'pro' || planId === 'agency') {
+      systemPrompt += `\n\n[INSTRUÇÃO PREMIUM - PNL & GATILHOS MENTAIS]: Utilize gatilhos mentais (autoridade, prova social, escassez) e técnicas de PNL avançadas de maneira fluida e não invasiva. Aja como um closer de alta performance, identificando rapidamente a dor primária do lead e ancorando a solução de forma persuasiva. Apele para a emoção, justificando com lógica.`;
+    }
+
     const messages = [
-      { role: "system", content: SOCIO_AI_SYSTEM_PROMPT }
+      { role: "system", content: systemPrompt }
     ];
 
     // Format history for Groq API

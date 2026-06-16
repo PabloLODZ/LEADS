@@ -8,12 +8,14 @@ import { useToast } from '../../contexts/ToastContext.jsx';
 import { useApp } from '../../contexts/AppContext.jsx';
 
 const MESSAGE_TYPES = [
-  { id: 'primeira_abordagem', label: '🚀 Primeira abordagem', description: 'Para leads ainda não contactados', premium: false },
-  { id: 'direta',            label: '⚡ Mensagem direta',    description: 'Objetiva, sem rodeios', premium: false },
-  { id: 'whatsapp_curta',    label: '📱 WhatsApp curta',     description: 'Máximo 3 linhas, ideal p/ WA', premium: false },
-  { id: 'followup_educado',   label: '📩 Follow-up educado',  description: 'Depois de uma mensagem sem resposta', premium: true },
-  { id: 'lead_frio',         label: '❄️ Lead frio',          description: 'Sem resposta há vários dias', premium: true },
-  { id: 'objecao_preco',     label: '💰 Objeção de preço',   description: 'Lead disse que está caro', premium: true },
+  { id: 'primeira_abordagem', label: '🚀 Primeira abordagem', description: 'Para leads ainda não contactados', locked: false, cost: 1 },
+  { id: 'direta',            label: '⚡ Mensagem direta',    description: 'Objetiva, sem rodeios', locked: false, cost: 1 },
+  { id: 'whatsapp_curta',    label: '📱 WhatsApp curta',     description: 'Máximo 3 linhas, ideal p/ WA', locked: false, cost: 1 },
+  { id: 'followup_educado',   label: '📩 Follow-up educado',  description: 'Depois de uma mensagem sem resposta', locked: false, cost: 1 },
+  { id: 'lead_frio',         label: '❄️ Lead frio',          description: 'Sem resposta há vários dias', locked: false, cost: 1 },
+  { id: 'objecao_preco',     label: '💰 Objeção de preço',   description: 'Lead disse que está caro', locked: false, cost: 1 },
+  { id: 'analise_psicologica', label: '🧠 Análise Psicológica', description: 'Usa PNL para analisar a bio do lead', premium: true, cost: 2 },
+  { id: 'extrator_objecoes',   label: '🛡️ Extrator de Objeções', description: 'Antecipa as barreiras de compra do lead', premium: true, cost: 2 },
 ];
 
 const FEEDBACK_OPTIONS = [
@@ -25,9 +27,9 @@ const FEEDBACK_OPTIONS = [
 ];
 
 export default function SocioIAPanel({ lead, campaign }) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, updateUser } = useAuth();
   const toast = useToast();
-  const { addInteraction } = useApp();
+  const { addInteraction, setCreditTransactions } = useApp();
 
   const [selectedType, setSelectedType] = useState('primeira_abordagem');
   const [customInstruction, setCustomInstruction] = useState('');
@@ -41,9 +43,11 @@ export default function SocioIAPanel({ lead, campaign }) {
   const isStarter = user?.planId === 'starter' && !isAdmin;
   const isCustomLocked = (user?.planId === 'starter' || user?.planId === 'growth') && !isAdmin;
 
+  const isProOrAgency = user?.planId === 'pro' || user?.planId === 'agency';
+
   const handleTypeSelect = (type) => {
-    if (type.premium && isStarter) {
-      toast.error('Recurso Premium', 'Faça upgrade para acessar tons avançados de negociação.');
+    if (type.premium && !isProOrAgency && !isAdmin) {
+      toast.error('Recurso Avançado', 'Faça upgrade para o plano PRO ou AGENCY para acessar a Análise Psicológica e PNL avançada.');
       return;
     }
     setSelectedType(type.id);
@@ -83,6 +87,10 @@ export default function SocioIAPanel({ lead, campaign }) {
           messageType: selectedType,
           customInstruction: customInstruction.trim() || null,
           userId: user.id,
+          campaign: campaign ? {
+            ...campaign,
+            planId: user?.planId,
+          } : { planId: user?.planId },
         }),
       });
 
@@ -94,6 +102,28 @@ export default function SocioIAPanel({ lead, campaign }) {
       const data = await response.json();
       setGeneratedMessage(data.message);
 
+      if (data.credits) {
+        updateUser({
+          creditWallet: {
+            baseCredits: data.credits.base_credits,
+            purchasedCredits: data.credits.purchased_credits,
+          }
+        });
+      }
+
+      if (data.transaction) {
+        setCreditTransactions(prev => [{
+          id: data.transaction.id,
+          userId: data.transaction.user_id,
+          type: data.transaction.type,
+          amount: data.transaction.amount,
+          balanceBefore: data.transaction.balance_before,
+          balanceAfter: data.transaction.balance_after,
+          reason: data.transaction.reason,
+          createdAt: data.transaction.created_at,
+        }, ...prev]);
+      }
+
       // Log in interactions
       await addInteraction(
         lead.id,
@@ -101,7 +131,7 @@ export default function SocioIAPanel({ lead, campaign }) {
         `Mensagem IA gerada (${data.messageTypeLabel}): ${data.message.substring(0, 100)}...`,
         'out',
         'ai_message_generated',
-        { messageType: selectedType, fullMessage: data.message }
+        { messageType: selectedType, fullMessage: data.message, cost: selectedTypeDef.cost || 1 }
       );
 
       toast.success('Mensagem gerada!', 'Revise e copie para o WhatsApp.');
@@ -121,7 +151,7 @@ export default function SocioIAPanel({ lead, campaign }) {
       `Mensagem IA copiada (${selectedTypeDef?.label})`,
       'out',
       'message_copied',
-      { source: 'socio_ia' }
+      { source: 'ia_especialista' }
     );
     toast.success('Copiado!', 'Mensagem na área de transferência.');
   };
@@ -158,8 +188,8 @@ export default function SocioIAPanel({ lead, campaign }) {
           <Sparkles size={14} color="#000" />
         </div>
         <div>
-          <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--text-primary)' }}>Sócio IA</div>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Gerador de mensagens com Gemini</div>
+          <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--text-primary)' }}>IA Especialista</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Gerador inteligente de mensagens</div>
         </div>
       </div>
 
@@ -188,26 +218,38 @@ export default function SocioIAPanel({ lead, campaign }) {
             boxShadow: 'var(--shadow-lg)', marginTop: '4px',
           }}>
             {MESSAGE_TYPES.map(type => {
-              const isLocked = type.premium && isStarter;
+              const isLocked = type.premium && (!isProOrAgency && !isAdmin);
               return (
-                <button
+                <div
                   key={type.id}
-                  onClick={() => handleTypeSelect(type)}
                   style={{
-                    width: '100%', textAlign: 'left', padding: '10px 12px',
-                    background: selectedType === type.id ? 'var(--green-active)' : 'transparent',
-                    border: 'none', cursor: isLocked ? 'not-allowed' : 'pointer', borderBottom: '1px solid var(--border-subtle)',
-                    color: selectedType === type.id ? 'var(--green-primary)' : 'var(--text-primary)',
-                    opacity: isLocked ? 0.6 : 1,
+                    padding: '12px',
+                    borderBottom: '1px solid var(--border-subtle)',
+                    cursor: 'pointer',
+                    background: selectedType === type.id ? 'var(--bg-active)' : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
                   }}
-                  title={isLocked ? 'Exclusivo Plano Growth ou superior' : ''}
+                  onClick={() => handleTypeSelect(type)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{ fontWeight: '600', fontSize: '13px' }}>{type.label}</div>
-                    {isLocked && <div style={{ fontSize: '10px', background: 'var(--bg-app)', padding: '2px 4px', borderRadius: '4px', color: 'var(--text-muted)' }}>PRO</div>}
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {type.label}
+                      {type.premium && (!isProOrAgency && !isAdmin) && (
+                        <span style={{ fontSize: '10px', background: 'var(--color-warning-bg)', color: 'var(--color-warning)', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <AlertCircle size={10} /> PRO
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                      {type.description}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{type.description}</div>
-                </button>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
+                    ⚡ {type.cost} Crédito{type.cost > 1 ? 's' : ''}
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -252,7 +294,7 @@ export default function SocioIAPanel({ lead, campaign }) {
         {isGenerating ? (
           <>
             <Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />
-            Gerando com Gemini...
+            Gerando com IA...
           </>
         ) : (
           <>
@@ -320,11 +362,14 @@ export default function SocioIAPanel({ lead, campaign }) {
 
       {/* Info footer */}
       {!generatedMessage && !isGenerating && (
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', padding: '8px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)' }}>
-          <AlertCircle size={13} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: '2px' }} />
-          <p style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.5, margin: 0 }}>
-            O Sócio IA usa dados do lead (cidade, segmento, bio, observações) para criar mensagens personalizadas com Gemini.
-          </p>
+        <div style={{ textAlign: 'center', padding: 'var(--space-md)' }}>
+          <Sparkles size={24} color="var(--text-muted)" style={{ margin: '0 auto var(--space-md)' }} />
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+            A IA Especialista usa dados do lead (cidade, segmento, bio, observações) para criar abordagens persuasivas focadas em conversão.
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--color-warning)', marginTop: '12px', fontWeight: '600' }}>
+            Custo: ⚡ {selectedTypeDef?.cost || 1} Crédito
+          </div>
         </div>
       )}
 
