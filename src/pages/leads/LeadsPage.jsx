@@ -243,6 +243,7 @@ export default function LeadsPage() {
           }}>
             Disponível no plano Growth
           </div>
+          </div>
         </div>
       </div>
 
