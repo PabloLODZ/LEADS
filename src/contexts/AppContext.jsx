@@ -404,6 +404,25 @@ export function AppProvider({ children }) {
     setLeads(prev => prev.filter(l => l.id !== id));
   }, []);
 
+  const deleteAllLeads = useCallback(async () => {
+    if (!user?.id) return;
+    
+    // Admin pode deletar todos os leads de todos, mas vamos deletar do usuário logado
+    // Se quiser deletar TODOS de forma global, teria que remover o filtro de user_id
+    // Mas para manter a segurança e contexto do usuário, vamos deletar apenas os dele (ou todos se não houver where).
+    // O ideal é deletar do usuário logado:
+    const { error } = await supabase.from('leads').delete().eq('user_id', user.id);
+    
+    if (error) {
+      console.error('Erro ao limpar leads:', error);
+      toast.error('Erro', 'Falha ao tentar limpar a base de leads.');
+      return;
+    }
+
+    setLeads([]);
+    toast.success('Pronto!', 'Todos os seus leads foram removidos.');
+  }, [user?.id]);
+
   const updateLeadStatus = useCallback(async (id, status, lossReason = '') => {
     const lead = leads.find(l => l.id === id);
     const previousStatus = lead?.status || 'novo';
@@ -811,6 +830,7 @@ export function AppProvider({ children }) {
       generateLeadsForCampaign,
       updateLead,
       deleteLead,
+      deleteAllLeads,
       updateLeadStatus,
 
       // Interaction actions
